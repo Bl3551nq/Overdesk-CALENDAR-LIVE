@@ -4,10 +4,6 @@ export const SOUND_LIST: SoundOption[] = [
   { key: 'pokemon_colo_heal', label: '🎮 Pokémon Heal' },
   { key: 'htc_sms_mail',      label: '📱 HTC SMS'      },
   { key: 'lyft_tone',         label: '🚗 Lyft Tone'    },
-  { key: 'happy_bell',        label: '🔔 Happy Bell'   },
-  { key: 'school_bell',       label: '🏫 School Bell'  },
-  { key: 'sms_bell',          label: '💬 SMS Bell'     },
-  { key: 'princess_bell',     label: '👑 Princess Bell'},
 ];
 
 export const SOUND_DATA: Record<string, string> = {

@@ -70,7 +70,7 @@ export function FilterPanel({
   const currentSound = SOUND_LIST[soundIndex] || SOUND_LIST[0];
 
   return (
-    <div className="absolute inset-0 bg-white/80 dark:bg-[#150f2be0] backdrop-blur-md z-40 flex flex-col p-4 rounded-[32px] select-none animate-fadeIn transition-colors duration-300">
+    <div className="absolute inset-0 settings-overlay z-40 flex flex-col p-4 select-none animate-fadeIn transition-all duration-300">
       
       {/* Header with Title & Reset Row */}
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-indigo-500/10 dark:border-white/5">
@@ -88,10 +88,9 @@ export function FilterPanel({
 
       {/* Filter Options Content Area */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin scrollbar-thumb-neutral-200 dark:scrollbar-thumb-neutral-800">
-        
-        {/* Section: Expected Impact */}
+           {/* Section: Expected Impact */}
         <div className="space-y-2">
-          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase select-none font-sans">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
             EXPECTED IMPACT
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -118,7 +117,7 @@ export function FilterPanel({
 
         {/* Section: Filter Currencies */}
         <div className="space-y-2">
-          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase select-none font-sans">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
             FILTER CURRENCIES
           </div>
           <div className="grid grid-cols-4 gap-1.5">
@@ -151,12 +150,12 @@ export function FilterPanel({
 
         {/* Section: Sound Alert triggers */}
         <div className="space-y-3 pt-3 border-t border-indigo-500/10 dark:border-white/5">
-          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase select-none font-sans">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
             🔔 EVENT ALERT SIGNALS
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">
               Trigger 5 min before alerts
             </span>
             
@@ -189,7 +188,7 @@ export function FilterPanel({
             >
               ‹
             </button>
-            <span className="flex-1 text-center text-[11px] font-black text-slate-700 dark:text-neutral-200 truncate font-sans">
+            <span className="flex-1 text-center text-[13px] font-extrabold text-slate-950 dark:text-white truncate font-sans">
               {currentSound.label}
             </span>
             <button
@@ -212,12 +211,12 @@ export function FilterPanel({
 
         {/* Section: Clock Option */}
         <div className="space-y-3 pt-3 border-t border-indigo-500/10 dark:border-white/5">
-          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase select-none font-sans">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
             🕒 TIME DISPLAY REGION
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 font-sans">
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-300 font-sans">
               Clock Format
             </span>
             
@@ -228,7 +227,7 @@ export function FilterPanel({
                 onClick={() => onToggle24Hour(false)}
                 className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all duration-150 ${
                   !use24Hour 
-                    ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-white shadow-sm' 
+                    ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -239,7 +238,7 @@ export function FilterPanel({
                 onClick={() => onToggle24Hour(true)}
                 className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all duration-150 ${
                   use24Hour 
-                    ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-white shadow-sm' 
+                    ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -267,6 +266,11 @@ export function FilterPanel({
         >
           Cancel
         </button>
+      </div>
+
+      {/* Bottom Brand Stamp */}
+      <div className="text-[9px] font-extrabold tracking-widest text-slate-400 dark:text-slate-500 text-center mt-3 uppercase font-sans">
+        OVERDESK FX CALENDAR
       </div>
 
     </div>

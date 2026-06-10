@@ -3,21 +3,25 @@ import { FxEvent, ImpactType } from './types';
 import { BUILTIN_DATA } from './data/events';
 import { SOUND_LIST, SOUND_DATA } from './data/sounds';
 import { useDrag } from './hooks/useDrag';
+import { playSynthesizedSound } from './utils/audioSynth';
 
 import WindowControls from './components/WindowControls';
 import Ticker from './components/Ticker';
 import FilterPanel from './components/FilterPanel';
 import EventItem from './components/EventItem';
+import LicenseGate from './components/LicenseGate';
 
 export default function App() {
   // --- STATE SYSTEM ---
+  const [isVerified, setIsVerified] = useState(false);
+  const [isLicenseLoading, setIsLicenseLoading] = useState(true);
   const [baseEvents, setBaseEvents] = useState<FxEvent[]>(BUILTIN_DATA);
   const [isLiveOnline, setIsLiveOnline] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(new Date());
   const [minimized, setMinimized] = useState(false);
   const [isBubble, setIsBubble] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('overdeskTheme') === 'dark');
   const [use24Hour, setUse24Hour] = useState(true);
 
   // Filter selections
@@ -33,7 +37,7 @@ export default function App() {
 
   // Alarm Alert Cuses
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [soundIndex, setSoundIndex] = useState(3); // Default happy_bell
+  const [soundIndex, setSoundIndex] = useState(0); // Default Pokémon Heal
   const [alertedEvents, setAlertedEvents] = useState<Set<string>>(new Set());
 
   // Drag controls
@@ -50,6 +54,17 @@ export default function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
+    // Restore license activation status
+    try {
+      const verified = localStorage.getItem('overdesk_license_verified');
+      if (verified === 'true') {
+        setIsVerified(true);
+      }
+    } catch (e) {
+      console.warn('License status read error', e);
+    }
+    setIsLicenseLoading(false);
+
     // Restore completed (marked-as-done) events
     try {
       const storedCompleted = localStorage.getItem('overdeskCompleted');
@@ -204,6 +219,12 @@ export default function App() {
 
   // --- AUDIO CONTROLS MANAGER ---
   const playSoundFile = (soundKey: string) => {
+    // First try the robust real-time Web Audio API synthesizer
+    if (playSynthesizedSound(soundKey)) {
+      return;
+    }
+    
+    // Fall back to pre-recorded base64 data URI if not covered by synthesizers
     const dataUri = SOUND_DATA[soundKey];
     if (!dataUri) return;
     try {
@@ -329,6 +350,26 @@ export default function App() {
     setIsFilterOpen(false);
   };
 
+  if (isLicenseLoading) {
+    return (
+      <div className={`fixed inset-0 flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-neutral-950 text-white font-sans' : 'bg-slate-50 text-slate-800 font-sans'}`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+          <p className="text-[11px] font-bold tracking-widest uppercase opacity-70">Loading Activation Gate...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isVerified) {
+    return (
+      <LicenseGate 
+        isDarkMode={isDarkMode} 
+        onVerifySuccess={() => setIsVerified(true)} 
+      />
+    );
+  }
+
   return (
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden select-none bg-white text-slate-800">
       
@@ -399,7 +440,7 @@ export default function App() {
                 <span>
                   {minimized 
                     ? new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) 
-                    : "FX OVERDESK"
+                    : "EVENTS"
                   }
                 </span>
                 {isLiveOnline && !minimized && (
