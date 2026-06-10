@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
@@ -8,6 +8,26 @@ process.env.NODE_ENV = 'production';
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;
+
+// Register IPC handlers for window control from renderer process
+ipcMain.on('resize-window', (event, width, height) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setSize(width, height);
+  }
+});
+
+ipcMain.on('close-window', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    // Hidden to tray instead of destroyed
+    mainWindow.hide();
+  }
+});
+
+ipcMain.on('minimize-window', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.minimize();
+  }
+});
 
 // Request single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
@@ -47,15 +67,16 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 600,
-    height: 800,
-    minHeight: 500,
-    minWidth: 400,
+    width: 350,
+    height: 520,
+    minHeight: 30,
+    minWidth: 50,
     title: "Overdesk FX Calendar",
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
     // Frameless and transparent options
     frame: false,

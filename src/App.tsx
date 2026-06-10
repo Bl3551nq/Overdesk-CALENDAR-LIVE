@@ -46,6 +46,32 @@ export default function App() {
   // Drag controls
   const { position, elementRef, onMouseDown, onTouchStart, hasMovedRef } = useDrag();
 
+  const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
+
+  // --- ELECTRON AUTO-RESIZE OBSERVER ---
+  useEffect(() => {
+    if (isElectron) {
+      const widgetEl = document.getElementById('overdesk-widget');
+      if (!widgetEl) return;
+
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const rect = entry.target.getBoundingClientRect();
+          const w = Math.ceil(rect.width);
+          const h = Math.ceil(rect.height);
+          if (w > 0 && h > 0) {
+            (window as any).electronAPI.resizeWindow(w, h);
+          }
+        }
+      });
+
+      observer.observe(widgetEl);
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [isElectron]);
+
   // --- LOCAL PERSISTENCE LOADS ---
   useEffect(() => {
     // Sync dark theme on body class system immediately
@@ -418,18 +444,18 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-screen flex items-center justify-center overflow-hidden select-none bg-transparent text-slate-800">
+    <div className={`${isElectron ? 'fixed inset-0 overflow-visible' : 'fixed inset-0 overflow-visible flex items-center justify-center'} select-none bg-transparent text-slate-800`}>
       
       {/* 1. Main Desktop utility Widget */}
       <div
         id="overdesk-widget"
         ref={elementRef}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
+        onMouseDown={isElectron ? undefined : onMouseDown}
+        onTouchStart={isElectron ? undefined : onTouchStart}
         style={{
           position: 'absolute',
-          left: `${position.x}px`,
-          top: `${position.y}px`,
+          left: isElectron ? '0px' : `${position.x}px`,
+          top: isElectron ? '0px' : `${position.y}px`,
           width: minimized && !isBubble ? '390px' : isBubble ? '54px' : '350px',
         }}
         onClick={(e) => {
@@ -456,7 +482,7 @@ export default function App() {
         {/* --- FULL FULL-WIDGET DOM STRUCTURE --- */}
         {!isBubble && (
           <>
-            {/* Top Bar macOS Buttons drag strip */}
+              {/* Top Bar macOS Buttons drag strip */}
             <div 
               className="top-bar cursor-grab active:cursor-grabbing select-none"
               style={{ display: 'grid', gridTemplateColumns: '54px 1fr 54px', alignItems: 'center', marginBottom: '12px' }}
@@ -464,7 +490,7 @@ export default function App() {
               {/* Native macOS style window elements */}
               <div style={{ display: 'flex', width: '54px' }}>
                 <WindowControls 
-                  onClose={() => setIsBubble(true)}
+                  onClose={() => isElectron ? (window as any).electronAPI.closeWindow() : setIsBubble(true)}
                   onMinimize={() => setMinimized(prev => !prev)}
                   onBubbleToggle={() => setIsBubble(true)}
                   minimized={minimized}

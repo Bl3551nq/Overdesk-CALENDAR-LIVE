@@ -14,6 +14,8 @@ interface EventItemProps {
 }
 
 export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onToggleComplete, index, use24Hour, isDarkMode, showActual, showForecast, showPrevious }) => {
+  const [isDismissing, setIsDismissing] = React.useState(false);
+
   // Flag system mappings
   const getFlagUrl = (cur: string) => {
     const code = cur.toUpperCase();
@@ -67,10 +69,9 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
   return (
     <div
       style={{ 
-        animationDelay: `${index * 0.05}s`,
-        transition: 'opacity 0.28s, transform 0.28s, max-height 0.28s'
+        animationDelay: `${index * 0.05}s`
       }}
-      className={`news-item select-none ${isCompleted ? 'opacity-25 pointer-events-none scale-95 origin-center' : ''}`}
+      className={`news-item select-none ${isCompleted ? 'opacity-25 pointer-events-none scale-95 origin-center' : ''} ${isDismissing ? 'dismissing' : ''}`}
     >
       {/* Coloured Impact Bar (High / Med / Low / Holiday) */}
       <div className={`impact-box ${impactClass}`} />
@@ -151,8 +152,19 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
           {/* Complete Check button wrapper */}
           <button
             type="button"
-            onClick={onToggleComplete}
-            className={`done-circle ${isCompleted ? 'done' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (isCompleted) {
+                onToggleComplete();
+              } else {
+                setIsDismissing(true);
+                setTimeout(() => {
+                  onToggleComplete();
+                }, 280);
+              }
+            }}
+            className={`done-circle ${isCompleted || isDismissing ? 'done' : ''}`}
             title={isCompleted ? "Recover Event" : "Dismiss Announcement"}
           />
         </div>

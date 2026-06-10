@@ -27,8 +27,8 @@ export function useDrag(initialX = 40, initialY = 40) {
 
   const onMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    // Don't drag if clicking buttons, select elements, svg items, input fields, or scrolls
-    if (target.closest('button, select, input, a, [role="button"], svg, path')) {
+    // Don't drag if clicking buttons, select elements, svg items, input fields, or inside card containers/settings panels
+    if (target.closest('button, select, input, a, [role="button"], svg, path, .card-container, .news-list, .settings-overlay, .filter-panel')) {
       return;
     }
     isDragging.current = true;
@@ -43,7 +43,7 @@ export function useDrag(initialX = 40, initialY = 40) {
 
   const onTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('button, select, input, a, [role="button"], svg, path')) {
+    if (target.closest('button, select, input, a, [role="button"], svg, path, .card-container, .news-list, .settings-overlay, .filter-panel')) {
       return;
     }
     isDragging.current = true;
