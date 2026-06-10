@@ -8,9 +8,12 @@ interface EventItemProps {
   index: number;
   use24Hour: boolean;
   isDarkMode: boolean;
+  showActual: boolean;
+  showForecast: boolean;
+  showPrevious: boolean;
 }
 
-export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onToggleComplete, index, use24Hour, isDarkMode }) => {
+export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onToggleComplete, index, use24Hour, isDarkMode, showActual, showForecast, showPrevious }) => {
   // Flag system mappings
   const getFlagUrl = (cur: string) => {
     const code = cur.toUpperCase();
@@ -50,9 +53,9 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
   // Build the secondary metrics line i.e. "Prev: 0.6% · F: 0.3%"
   const getMetricsString = () => {
     const parts = [];
-    if (event.previous) parts.push(`Prev: ${event.previous}`);
-    if (event.forecast) parts.push(`F: ${event.forecast}`);
-    if (event.actual) parts.push(`Act: ${event.actual}`);
+    if (showPrevious && event.previous) parts.push(`Prev: ${event.previous}`);
+    if (showForecast && event.forecast) parts.push(`F: ${event.forecast}`);
+    if (showActual && event.actual) parts.push(`Act: ${event.actual}`);
     return parts.join(' · ');
   };
 

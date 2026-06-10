@@ -15,6 +15,12 @@ interface FilterPanelProps {
   onPreviewSound: () => void;
   use24Hour: boolean;
   onToggle24Hour: (use24: boolean) => void;
+  showActual: boolean;
+  onToggleActual: (val: boolean) => void;
+  showForecast: boolean;
+  onToggleForecast: (val: boolean) => void;
+  showPrevious: boolean;
+  onTogglePrevious: (val: boolean) => void;
   onResetAll: () => void;
   onApply: () => void;
   onCancel: () => void;
@@ -33,6 +39,12 @@ export function FilterPanel({
   onPreviewSound,
   use24Hour,
   onToggle24Hour,
+  showActual,
+  onToggleActual,
+  showForecast,
+  onToggleForecast,
+  showPrevious,
+  onTogglePrevious,
   onResetAll,
   onApply,
   onCancel
@@ -80,7 +92,7 @@ export function FilterPanel({
         <button
           type="button"
           onClick={onResetAll}
-          className="text-[10px] font-bold py-1 px-3 rounded-xl bg-indigo-500/10 dark:bg-white/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-550/20 active:scale-95 transition-all select-none border border-transparent font-sans"
+          className="text-[10px] font-bold py-1 px-3 rounded-xl bg-indigo-500/10 dark:bg-white/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white active:scale-95 transition-all select-none border border-transparent font-sans"
         >
           ↺ Reset All
         </button>
@@ -205,6 +217,54 @@ export function FilterPanel({
               title="Test Sound"
             >
               ▶
+            </button>
+          </div>
+        </div>
+
+        {/* Section: Metrics display options */}
+        <div className="space-y-2 pt-3 border-t border-indigo-500/10 dark:border-white/5">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
+            📊 DISCLOSURE METRICS
+          </div>
+          
+          <div className="grid grid-cols-3 gap-1.5 font-sans">
+            {/* Show Actual Toggle */}
+            <button
+              type="button"
+              onClick={() => onToggleActual(!showActual)}
+              className={`flex items-center justify-center py-1.5 px-1 rounded-xl border transition-all cursor-pointer text-[10px] font-bold tracking-wider uppercase ${
+                showActual
+                  ? 'border-indigo-500/30 bg-indigo-500/15 text-indigo-600 dark:border-indigo-400/30 dark:bg-indigo-500/25 dark:text-indigo-200'
+                  : 'border-transparent bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-neutral-400 opacity-60'
+              }`}
+            >
+              <span>Actual</span>
+            </button>
+
+            {/* Show Forecast Toggle */}
+            <button
+              type="button"
+              onClick={() => onToggleForecast(!showForecast)}
+              className={`flex items-center justify-center py-1.5 px-1 rounded-xl border transition-all cursor-pointer text-[10px] font-bold tracking-wider uppercase ${
+                showForecast
+                  ? 'border-[#6366f1]/30 bg-indigo-500/15 text-indigo-600 dark:border-indigo-400/30 dark:bg-indigo-500/25 dark:text-indigo-200'
+                  : 'border-transparent bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-neutral-400 opacity-60'
+              }`}
+            >
+              <span>Forecast</span>
+            </button>
+
+            {/* Show Previous Toggle */}
+            <button
+              type="button"
+              onClick={() => onTogglePrevious(!showPrevious)}
+              className={`flex items-center justify-center py-1.5 px-1 rounded-xl border transition-all cursor-pointer text-[10px] font-bold tracking-wider uppercase ${
+                showPrevious
+                  ? 'border-[#6366f1]/30 bg-indigo-500/15 text-indigo-600 dark:border-[#a5b4fc]/30 dark:bg-indigo-500/25 dark:text-indigo-200'
+                  : 'border-transparent bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-neutral-400 opacity-60'
+              }`}
+            >
+              <span>Previous</span>
             </button>
           </div>
         </div>

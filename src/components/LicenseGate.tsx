@@ -94,14 +94,14 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess }: LicenseGate
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #ededf5;
+          background: transparent;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           overflow: hidden;
           transition: background 0.5s ease;
         }
 
         #overdesk-activation-gate.dark {
-          background: #09090e;
+          background: transparent;
         }
 
         #overdesk-activation-gate::before {

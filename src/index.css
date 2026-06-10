@@ -2,6 +2,11 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+html, body, #root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --animate-marquee: marquee 400s linear infinite;
@@ -222,9 +227,9 @@ body.dark .widget.bubble {
 }
 
 body.dark .card-container {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.10);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  background: rgba(14, 10, 26, 0.75);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
 /* Navigation Buttons */

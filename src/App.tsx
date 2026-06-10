@@ -23,6 +23,9 @@ export default function App() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('overdeskTheme') === 'dark');
   const [use24Hour, setUse24Hour] = useState(true);
+  const [showActual, setShowActual] = useState(true);
+  const [showForecast, setShowForecast] = useState(true);
+  const [showPrevious, setShowPrevious] = useState(true);
 
   // Filter selections
   const [activeImpacts, setActiveImpacts] = useState<Set<ImpactType>>(
@@ -99,6 +102,20 @@ export default function App() {
     const storedUse24 = localStorage.getItem('overdeskUse24Hour');
     if (storedUse24 !== null) {
       setUse24Hour(storedUse24 === 'true');
+    }
+
+    // Restore metric visibility preferences
+    const storedShowActual = localStorage.getItem('overdeskShowActual');
+    if (storedShowActual !== null) {
+      setShowActual(storedShowActual === 'true');
+    }
+    const storedShowForecast = localStorage.getItem('overdeskShowForecast');
+    if (storedShowForecast !== null) {
+      setShowForecast(storedShowForecast === 'true');
+    }
+    const storedShowPrevious = localStorage.getItem('overdeskShowPrevious');
+    if (storedShowPrevious !== null) {
+      setShowPrevious(storedShowPrevious === 'true');
     }
   }, []);
 
@@ -214,6 +231,33 @@ export default function App() {
       localStorage.setItem('overdeskUse24Hour', String(use24));
     } catch (e) {
       console.warn('Time format storage error', e);
+    }
+  };
+
+  const handleToggleActual = (val: boolean) => {
+    setShowActual(val);
+    try {
+      localStorage.setItem('overdeskShowActual', String(val));
+    } catch (e) {
+      console.warn('Show actual storage error', e);
+    }
+  };
+
+  const handleToggleForecast = (val: boolean) => {
+    setShowForecast(val);
+    try {
+      localStorage.setItem('overdeskShowForecast', String(val));
+    } catch (e) {
+      console.warn('Show forecast storage error', e);
+    }
+  };
+
+  const handleTogglePrevious = (val: boolean) => {
+    setShowPrevious(val);
+    try {
+      localStorage.setItem('overdeskShowPrevious', String(val));
+    } catch (e) {
+      console.warn('Show previous storage error', e);
     }
   };
 
@@ -347,12 +391,15 @@ export default function App() {
     localStorage.removeItem('overdeskCompleted');
     setActiveImpacts(new Set(['High', 'Medium', 'Low', 'Holiday']));
     setActiveCurrencies(new Set(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'NZD', 'CHF']));
+    handleToggleActual(true);
+    handleToggleForecast(true);
+    handleTogglePrevious(true);
     setIsFilterOpen(false);
   };
 
   if (isLicenseLoading) {
     return (
-      <div className={`fixed inset-0 flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-neutral-950 text-white font-sans' : 'bg-slate-50 text-slate-800 font-sans'}`}>
+      <div className={`fixed inset-0 flex items-center justify-center transition-colors duration-500 bg-transparent ${isDarkMode ? 'text-white' : 'text-slate-800'} font-sans`}>
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
           <p className="text-[11px] font-bold tracking-widest uppercase opacity-70">Loading Activation Gate...</p>
@@ -371,7 +418,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-screen flex items-center justify-center overflow-hidden select-none bg-white text-slate-800">
+    <div className="relative w-full h-screen flex items-center justify-center overflow-hidden select-none bg-transparent text-slate-800">
       
       {/* 1. Main Desktop utility Widget */}
       <div
@@ -511,6 +558,9 @@ export default function App() {
                     index={index}
                     use24Hour={use24Hour}
                     isDarkMode={isDarkMode}
+                    showActual={showActual}
+                    showForecast={showForecast}
+                    showPrevious={showPrevious}
                     isCompleted={completedEvents.has(`${ev.title}|${ev.date}`)}
                     onToggleComplete={() => toggleEventComplete(ev.title, ev.date)}
                   />
@@ -573,6 +623,12 @@ export default function App() {
               onPreviewSound={previewSound}
               use24Hour={use24Hour}
               onToggle24Hour={saveTimeFormatPreference}
+              showActual={showActual}
+              onToggleActual={handleToggleActual}
+              showForecast={showForecast}
+              onToggleForecast={handleToggleForecast}
+              showPrevious={showPrevious}
+              onTogglePrevious={handleTogglePrevious}
               onResetAll={handleResetAll}
               onApply={handleApplyFilters}
               onCancel={() => setIsFilterOpen(false)}

@@ -57,8 +57,11 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    // Frameless option or custom clean visual appearance
+    // Frameless and transparent options
+    frame: false,
+    transparent: true,
     autoHideMenuBar: true,
+    hasShadow: true,
   });
 
   // Load the Express server url
