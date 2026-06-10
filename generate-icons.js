@@ -3,6 +3,34 @@ import path from 'path';
 import { Jimp } from 'jimp';
 import pngToIco from 'png-to-ico';
 
+function isValidPng(filePath) {
+  if (!fs.existsSync(filePath)) return false;
+  const stats = fs.statSync(filePath);
+  if (stats.size < 1000) return false; // Git LFS pointers are usually < 500 bytes
+
+  try {
+    const fd = fs.openSync(filePath, 'r');
+    const buffer = Buffer.alloc(8);
+    fs.readSync(fd, buffer, 0, 8, 0);
+    fs.closeSync(fd);
+    return buffer.toString('hex') === '89504e470d0a1a0a';
+  } catch (err) {
+    return false;
+  }
+}
+
+async function downloadOriginalPng(dest) {
+  const url = "https://raw.githubusercontent.com/Bl3551nq/Overdesk-Logos/main/OVERDESK-fx%20calendar.png";
+  console.log(`Downloading original PNG from ${url}...`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+  const arrayBuffer = await res.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, buffer);
+  console.log(`Downloaded original PNG successfully! Size: ${buffer.length} bytes`);
+}
+
 async function main() {
   try {
     const inputPath = path.join(process.cwd(), 'assets', 'icon.png');
@@ -10,9 +38,9 @@ async function main() {
     const finalPngPath = path.join(process.cwd(), 'assets', 'icon.png');
     const finalIcoPath = path.join(process.cwd(), 'assets', 'icon.ico');
 
-    if (!fs.existsSync(inputPath)) {
-      console.error('Error: Source assets/icon.png not found!');
-      process.exit(1);
+    if (!isValidPng(inputPath)) {
+      console.log('Source assets/icon.png is missing or is not a valid PNG (likely a Git LFS pointer).');
+      await downloadOriginalPng(inputPath);
     }
 
     console.log('Loading source PNG with Jimp...');
