@@ -4,6 +4,13 @@
   "directories": {
     "output": "dist-electron"
   },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "Bl3551nq",
+      "repo": "Overdesk-CALENDAR-LIVE"
+    }
+  ],
   "files": [
     "dist/**/*",
     "electron-main.cjs",

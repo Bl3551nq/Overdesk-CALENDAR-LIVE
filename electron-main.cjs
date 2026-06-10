@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, dialog } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 // Ensure production mode
 process.env.NODE_ENV = 'production';
@@ -23,18 +24,24 @@ if (!gotTheLock) {
     }
   });
 
-  // Start Express Backend Server
-  try {
-    console.log("Starting backend Express server within Electron...");
-    require('./dist/server.cjs');
-  } catch (err) {
-    console.error("Failed to start backend Express server:", err);
-  }
-
   // Set up Electron Application
   app.whenReady().then(() => {
+    // Standardize paths and app root
+    process.env.ELECTRON_APP_PATH = app.getAppPath();
+
+    // Start Express Backend Server inside ready event
+    try {
+      console.log("Starting backend Express server within Electron...");
+      require('./dist/server.cjs');
+    } catch (err) {
+      console.error("Failed to start backend Express server:", err);
+    }
+
     createWindow();
     createTray();
+
+    // Start background auto-updates
+    initAutoUpdater();
   });
 }
 
@@ -56,6 +63,18 @@ function createWindow() {
 
   // Load the Express server url
   mainWindow.loadURL('http://localhost:3000');
+
+  // Handle load failure gracefully (retry until server is fully active)
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    if (validatedURL && (validatedURL.startsWith('http://localhost:3000') || validatedURL.startsWith('http://127.0.0.1:3000'))) {
+      console.log(`Failed to load ${validatedURL} (${errorDescription}). Retrying in 1000ms...`);
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.loadURL('http://localhost:3000');
+        }
+      }, 1000);
+    }
+  });
 
   // Handle Close Button action (hide to system tray instead of exiting)
   mainWindow.on('close', (event) => {
@@ -149,3 +168,64 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
+
+function initAutoUpdater() {
+  console.log("Initializing electron-updater for background deployment...");
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('error', (err) => {
+    console.error('Auto Updater encoutered an error:', err);
+  });
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates on GitHub...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log(`Update is available! Version found: ${info.version}`);
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('Already running the latest version of Overdesk FX Calendar.');
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`Downloading update: ${progressObj.percent.toFixed(2)}% completed...`);
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log(`Update downloaded! Prepared version: ${info.version}`);
+
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Ready to Install',
+      message: `A new version (${info.version}) of Overdesk FX Calendar has been successfully downloaded in the background.\n\nWould you like to restart the application now to apply the update?`,
+      buttons: ['Restart and Update Now', 'Install on Exit'],
+      defaultId: 0,
+      cancelId: 1
+    }).then((result) => {
+      if (result.response === 0) {
+        console.log('User chose to restart and install update.');
+        autoUpdater.quitAndInstall();
+      } else {
+        console.log('User deferred installation until application exit.');
+      }
+    });
+  });
+
+  // Check for updates 5 seconds after startup (non-blocking)
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+      console.error('Failed to run initial GitHub update check:', err);
+    });
+  }, 5000);
+
+  // Periodically check for updates every 2 hours
+  setInterval(() => {
+    autoUpdater.checkForUpdates().catch(err => {
+      console.error('Failed to run periodic update check:', err);
+    });
+  }, 2 * 60 * 60 * 1000);
+}

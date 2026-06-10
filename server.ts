@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -78,13 +77,15 @@ async function startServer() {
 
   // Serve static dist in production, use Vite middleware in dev
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
+    const { createServer } = await import('vite');
+    const vite = await createServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const rootPath = process.env.ELECTRON_APP_PATH || process.cwd();
+    const distPath = path.join(rootPath, 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
