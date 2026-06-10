@@ -1,0 +1,27 @@
+{
+  "appId": "com.overdesk.fxcalendar",
+  "productName": "Overdesk FX Calendar",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "dist/**/*",
+    "electron-main.cjs",
+    "assets/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": ["nsis"],
+    "icon": "assets/icon.png"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Overdesk FX Calendar",
+    "runAfterFinish": true
+  }
+}
