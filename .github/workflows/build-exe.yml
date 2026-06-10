@@ -7,6 +7,9 @@ on:
       - master
   workflow_dispatch: # Allows manual trigger from the GitHub web interface
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
