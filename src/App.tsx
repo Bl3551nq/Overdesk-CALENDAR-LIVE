@@ -42,36 +42,82 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [soundIndex, setSoundIndex] = useState(0); // Default Pokémon Heal
   const [alertedEvents, setAlertedEvents] = useState<Set<string>>(new Set());
+  const [disabledAlarms, setDisabledAlarms] = useState<Set<string>>(new Set());
 
   // Drag controls
   const { position, elementRef, onMouseDown, onTouchStart, hasMovedRef } = useDrag();
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
 
-  // --- ELECTRON AUTO-RESIZE OBSERVER ---
+  // --- ELECTRON AUTO-RESIZE & HOVER CLICK-THROUGH HANDLERS ---
   useEffect(() => {
     if (isElectron) {
-      const widgetEl = document.getElementById('overdesk-widget');
-      if (!widgetEl) return;
+      // 1. DYNAMIC ELEMENT OBSERVER (Switches observing between LicenseGate Card and App Widget)
+      let rObserver: ResizeObserver | null = null;
+      let currentObserved: Element | null = null;
 
-      const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const rect = entry.target.getBoundingClientRect();
-          const w = Math.ceil(rect.width);
-          const h = Math.ceil(rect.height);
-          if (w > 0 && h > 0) {
-            // Add a buffer (80px padding on each side = 160px total) to the resized window to allow shadows to render smoothly without cropping!
-            (window as any).electronAPI.resizeWindow(w + 160, h + 160);
-          }
+      const setupObserver = () => {
+        const targetEl = document.getElementById('overdesk-widget') || 
+                         document.querySelector('#overdesk-activation-gate .card');
+        
+        if (!targetEl) return;
+        if (currentObserved === targetEl) return;
+        
+        if (rObserver) {
+          rObserver.disconnect();
         }
-      });
+        
+        currentObserved = targetEl;
+        rObserver = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const rect = entry.target.getBoundingClientRect();
+            // Math.ceil secures integer dimensions to prevent subpixel layout shift cropping
+            const w = Math.ceil(rect.width);
+            const h = Math.ceil(rect.height);
+            if (w > 0 && h > 0) {
+              // Add ample transparent padding buffer (80px on each side = 160px) for beautiful blurred shadow casting
+              (window as any).electronAPI.resizeWindow(w + 160, h + 160);
+            }
+          }
+        });
+        
+        rObserver.observe(targetEl);
+      };
 
-      observer.observe(widgetEl);
+      setupObserver();
+
+      // Mutation observer to dynamically re-bind the resize observer when screens mount/unmount
+      const mObserver = new MutationObserver(() => {
+        setupObserver();
+      });
+      mObserver.observe(document.body, { childList: true, subtree: true });
+
+      // 2. PERFECT HOVER MOUSE CLICK-THROUGH (Ignores transparent regions & shadows completely)
+      const handleMouseMove = (e: MouseEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+        
+        // Match active interactable parts of our UI:
+        const isInteractive = target.closest('.widget') !== null || 
+                              target.closest('.settings-overlay') !== null ||
+                              target.closest('#overdesk-activation-gate .card') !== null;
+        
+        if (isInteractive) {
+          (window as any).electronAPI.setIgnoreMouseEvents(false);
+        } else {
+          (window as any).electronAPI.setIgnoreMouseEvents(true, { forward: true });
+        }
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+
       return () => {
-        observer.disconnect();
+        if (rObserver) rObserver.disconnect();
+        mObserver.disconnect();
+        window.removeEventListener('mousemove', handleMouseMove);
       };
     }
-  }, [isElectron]);
+  }, [isElectron, isVerified]);
 
   // --- LOCAL PERSISTENCE LOADS ---
   useEffect(() => {
@@ -117,6 +163,16 @@ export default function App() {
       }
     } catch (e) {
       console.warn('Alerts read error', e);
+    }
+
+    // Restore disabled alarms state
+    try {
+      const storedMuted = localStorage.getItem('overdeskDisabledAlarms');
+      if (storedMuted) {
+        setDisabledAlarms(new Set<string>(JSON.parse(storedMuted) as string[]));
+      }
+    } catch (e) {
+      console.warn('Disabled alarms read error', e);
     }
 
     // Restore theme preference
@@ -243,6 +299,26 @@ export default function App() {
     }
   };
 
+  const saveDisabledAlarmsState = (updated: Set<string>) => {
+    setDisabledAlarms(updated);
+    try {
+      localStorage.setItem('overdeskDisabledAlarms', JSON.stringify([...updated]));
+    } catch (e) {
+      console.warn('Disabled alarms save error', e);
+    }
+  };
+
+  const toggleAlarmDisabled = (title: string, date: string) => {
+    const key = `${title}|${date}`;
+    const updated = new Set<string>(disabledAlarms);
+    if (updated.has(key)) {
+      updated.delete(key);
+    } else {
+      updated.add(key);
+    }
+    saveDisabledAlarmsState(updated);
+  };
+
   const saveThemePreference = (darkModeState: boolean) => {
     setIsDarkMode(darkModeState);
     try {
@@ -356,17 +432,22 @@ export default function App() {
             nextAlerted.add(key);
             saveAlertState(nextAlerted);
 
-            // Ring matching audio chime 3 times
-            const curSoundKey = SOUND_LIST[soundIndex].key;
-            triggerRings(curSoundKey, 3);
-            console.log(`[FX SYSTEM ALERT] 5-minute incoming news: ${ev.title}`);
+            // Turn off alarm if the bell is muted for this specific event
+            if (!disabledAlarms.has(key)) {
+              // Ring matching audio chime 3 times
+              const curSoundKey = SOUND_LIST[soundIndex].key;
+              triggerRings(curSoundKey, 3);
+              console.log(`[FX SYSTEM ALERT] 5-minute incoming news: ${ev.title}`);
+            } else {
+              console.log(`[FX SYSTEM ALERT] 5-minute incoming news muted (bell off): ${ev.title}`);
+            }
           }
         }
       });
     }, 12000); // Poll every 12 seconds
 
     return () => clearInterval(alertTimer);
-  }, [soundEnabled, soundIndex, alertedEvents]);
+  }, [soundEnabled, soundIndex, alertedEvents, disabledAlarms]);
 
   // --- DAY CALCULATOR & HEADINGS ---
   const dayStr = viewDate.toLocaleDateString('en-CA');
@@ -434,6 +515,12 @@ export default function App() {
     handleToggleActual(true);
     handleToggleForecast(true);
     handleTogglePrevious(true);
+    setIsFilterOpen(false);
+  };
+
+  const handleDeactivateLicense = () => {
+    localStorage.removeItem('overdesk_license_verified');
+    setIsVerified(false);
     setIsFilterOpen(false);
   };
 
@@ -615,6 +702,8 @@ export default function App() {
                     showPrevious={showPrevious}
                     isCompleted={completedEvents.has(`${ev.title}|${ev.date}`)}
                     onToggleComplete={() => toggleEventComplete(ev.title, ev.date)}
+                    isAlarmDisabled={disabledAlarms.has(`${ev.title}|${ev.date}`)}
+                    onToggleAlarm={() => toggleAlarmDisabled(ev.title, ev.date)}
                   />
                 ))}
 
@@ -684,6 +773,7 @@ export default function App() {
               onResetAll={handleResetAll}
               onApply={handleApplyFilters}
               onCancel={() => setIsFilterOpen(false)}
+              onDeactivateLicense={handleDeactivateLicense}
             />
 
           </>

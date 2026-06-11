@@ -24,6 +24,7 @@ interface FilterPanelProps {
   onResetAll: () => void;
   onApply: () => void;
   onCancel: () => void;
+  onDeactivateLicense?: () => void;
 }
 
 export function FilterPanel({
@@ -47,7 +48,8 @@ export function FilterPanel({
   onTogglePrevious,
   onResetAll,
   onApply,
-  onCancel
+  onCancel,
+  onDeactivateLicense
 }: FilterPanelProps) {
   if (!isOpen) return null;
 
@@ -307,6 +309,27 @@ export function FilterPanel({
             </div>
           </div>
         </div>
+
+        {/* Section: License System Deactivation (For testing) */}
+        {onDeactivateLicense && (
+          <div className="space-y-3 pt-3 border-t border-indigo-500/10 dark:border-white/5">
+            <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
+              🔑 DEVICE LICENSE GATE
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-300 font-sans">
+                Active Activation Key
+              </span>
+              <button
+                type="button"
+                onClick={onDeactivateLicense}
+                className="text-[10px] font-extrabold py-1.5 px-3 rounded-xl border border-red-500/35 bg-red-500/10 hover:bg-red-650 hover:text-white text-red-600 dark:border-red-500/25 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white active:scale-95 transition-all select-none font-sans shrink-0 cursor-pointer"
+              >
+                Reset Activation
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
 

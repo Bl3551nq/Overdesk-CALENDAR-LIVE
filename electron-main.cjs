@@ -16,6 +16,12 @@ ipcMain.on('resize-window', (event, width, height) => {
   }
 });
 
+ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setIgnoreMouseEvents(ignore, options);
+  }
+});
+
 ipcMain.on('close-window', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     // Hidden to tray instead of destroyed
@@ -82,7 +88,9 @@ function createWindow() {
     frame: false,
     transparent: true,
     autoHideMenuBar: true,
-    hasShadow: true,
+    hasShadow: false,
+    maximizable: false,
+    fullscreenable: false,
     alwaysOnTop: true, // Always on top by default
   });
 

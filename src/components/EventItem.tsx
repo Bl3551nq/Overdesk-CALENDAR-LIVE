@@ -1,5 +1,6 @@
 import React from 'react';
 import { FxEvent } from '../types';
+import { Bell, BellOff } from 'lucide-react';
 
 interface EventItemProps {
   event: FxEvent;
@@ -11,9 +12,23 @@ interface EventItemProps {
   showActual: boolean;
   showForecast: boolean;
   showPrevious: boolean;
+  isAlarmDisabled: boolean;
+  onToggleAlarm: () => void;
 }
 
-export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onToggleComplete, index, use24Hour, isDarkMode, showActual, showForecast, showPrevious }) => {
+export const EventItem: React.FC<EventItemProps> = ({ 
+  event, 
+  isCompleted, 
+  onToggleComplete, 
+  index, 
+  use24Hour, 
+  isDarkMode, 
+  showActual, 
+  showForecast, 
+  showPrevious,
+  isAlarmDisabled,
+  onToggleAlarm
+}) => {
   const [isDismissing, setIsDismissing] = React.useState(false);
   // Freeze the index at Mount so that animation delay stays fixed and does not cause a "refresh/re-trigger" when items are dismissed
   const [initialIndex] = React.useState(index);
@@ -150,7 +165,30 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
         </span>
 
         {/* Controls row */}
-        <div className="flex items-center gap-1.5 mt-0.5" style={{ paddingRight: '5px' }}>
+        <div className="flex items-center gap-2 mt-0.5" style={{ paddingRight: '5px' }}>
+          {/* Bell Alarm Toggle Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onToggleAlarm();
+            }}
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            className={`flex items-center justify-center p-1 rounded-full cursor-pointer hover:bg-neutral-500/10 dark:hover:bg-white/10 transition-all text-xs active:scale-90 select-none ${
+              isAlarmDisabled 
+                ? 'text-slate-400 dark:text-neutral-500/80 hover:text-slate-500 dark:hover:text-neutral-300' 
+                : 'text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300'
+            }`}
+            title={isAlarmDisabled ? "Turn ON 5-minute Alarm Warning" : "Turn OFF 5-minute Alarm Warning"}
+          >
+            {isAlarmDisabled ? (
+              <BellOff className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} />
+            ) : (
+              <Bell className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} />
+            )}
+          </button>
+
           {/* Complete Check button wrapper */}
           <button
             type="button"

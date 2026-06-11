@@ -85,9 +85,10 @@ body.dark .blob {
   border: 1px solid rgba(160, 175, 255, 0.45);
   padding: 16px 14px 18px;
   box-shadow:
-    0 22px 64px rgba(100, 110, 200, 0.1),
-    0 4px 18px rgba(100, 110, 200, 0.05),
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    0 12px 40px rgba(100, 110, 240, 0.08),
+    0 24px 80px rgba(100, 110, 240, 0.06),
+    0 4px 12px rgba(100, 110, 240, 0.03),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
   transition: box-shadow 0.5s, border-color 0.5s, background 0.5s, transform 0.25s, opacity 0.25s;
   -webkit-app-region: drag;
 }
@@ -113,8 +114,9 @@ body.dark .widget {
   background: rgba(24, 20, 38, 0.96); /* Slightly more opaque background to prevent transparent outline composite leakage */
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.55),
-    0 4px 16px rgba(0, 0, 0, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 24px 72px rgba(0, 0, 0, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.25),
     0 1px 0 rgba(255, 255, 255, 0.08) inset;
   /* Disable backdrop-filter in dark mode to fix the famous Chromium transparent frameless compositing outline bug! */
   backdrop-filter: none !important;
@@ -336,24 +338,36 @@ body.dark .btn-filter {
   max-height: 255px;
   overflow-y: auto;
   padding-right: 4px;
-  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-padding-top: 8px;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .news-list::-webkit-scrollbar {
-  width: 0px !important;
+  width: 4px !important;
   background: transparent;
+}
+
+.news-list::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 200, 0.15) !important;
+  border-radius: 99px !important;
+}
+
+body.dark .news-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Custom premium scrollbar for settings / edit areas to prevent clunky OS scrolls */
 .settings-overlay,
 .settings-overlay * {
+  scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
 .settings-overlay *::-webkit-scrollbar,
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px !important;
-  height: 4px !important;
+  width: 5px !important;
+  height: 5px !important;
 }
 
 .settings-overlay *::-webkit-scrollbar-track,
