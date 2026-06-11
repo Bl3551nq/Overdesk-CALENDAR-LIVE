@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,6 +10,21 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // API Route: Check installation/build status for clean first launches
+  app.get('/api/install-status', (req, res) => {
+    try {
+      const packagePath = path.join(process.cwd(), 'package.json');
+      let mtime = Date.now();
+      if (fs.existsSync(packagePath)) {
+        const stats = fs.statSync(packagePath);
+        mtime = stats.mtimeMs;
+      }
+      res.json({ success: true, installHash: `mtime-${mtime}` });
+    } catch (err) {
+      res.json({ success: false, installHash: 'default' });
+    }
+  });
 
   // API Route: Verify license
   app.post('/api/license/verify', async (req, res) => {

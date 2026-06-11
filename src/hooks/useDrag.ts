@@ -15,12 +15,13 @@ export function useDrag(initialX = 40, initialY = 40) {
 
   // Center position on mount if we want, or keep initial
   useEffect(() => {
-    const widgetWidth = 350;
-    const widgetHeight = 520;
+    const rect = elementRef.current?.getBoundingClientRect();
+    const widgetWidth = rect?.width || 350;
+    const widgetHeight = rect?.height || 520;
     
     // Smoothly calculate center coordinates while maintaining safe minimum margins
-    const x = Math.max(10, (window.innerWidth - widgetWidth) / 2);
-    const y = Math.max(10, (window.innerHeight - widgetHeight) / 2);
+    const x = window.innerWidth > widgetWidth ? (window.innerWidth - widgetWidth) / 2 : 0;
+    const y = window.innerHeight > widgetHeight ? (window.innerHeight - widgetHeight) / 2 : 0;
     
     setPosition({ x, y });
     positionRef.current = { x, y };
@@ -74,9 +75,18 @@ export function useDrag(initialX = 40, initialY = 40) {
       const newX = e.clientX - dragStart.current.x;
       const newY = e.clientY - dragStart.current.y;
       
-      // Clamp to screen boundaries to avoid losing the widget
-      const boundX = Math.max(10, Math.min(window.innerWidth - 80, newX));
-      const boundY = Math.max(10, Math.min(window.innerHeight - 80, newY));
+      const rect = elementRef.current?.getBoundingClientRect();
+      const w = rect?.width || 350;
+      const h = rect?.height || 520;
+      
+      // Calculate boundaries based on actual widget dimensions to prevent any clipping/cutoff
+      const boundX = window.innerWidth > w + 24 
+        ? Math.max(12, Math.min(window.innerWidth - w - 12, newX))
+        : Math.max(0, (window.innerWidth - w) / 2);
+
+      const boundY = window.innerHeight > h + 24
+        ? Math.max(12, Math.min(window.innerHeight - h - 12, newY))
+        : Math.max(0, (window.innerHeight - h) / 2);
       
       positionRef.current = { x: boundX, y: boundY };
       if (elementRef.current) {
@@ -102,8 +112,17 @@ export function useDrag(initialX = 40, initialY = 40) {
       const newX = touch.clientX - dragStart.current.x;
       const newY = touch.clientY - dragStart.current.y;
       
-      const boundX = Math.max(10, Math.min(window.innerWidth - 80, newX));
-      const boundY = Math.max(10, Math.min(window.innerHeight - 80, newY));
+      const rect = elementRef.current?.getBoundingClientRect();
+      const w = rect?.width || 350;
+      const h = rect?.height || 520;
+      
+      const boundX = window.innerWidth > w + 24 
+        ? Math.max(12, Math.min(window.innerWidth - w - 12, newX))
+        : Math.max(0, (window.innerWidth - w) / 2);
+
+      const boundY = window.innerHeight > h + 24
+        ? Math.max(12, Math.min(window.innerHeight - h - 12, newY))
+        : Math.max(0, (window.innerHeight - h) / 2);
       
       positionRef.current = { x: boundX, y: boundY };
       if (elementRef.current) {

@@ -130,16 +130,52 @@ export default function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Restore license activation status
-    try {
-      const verified = localStorage.getItem('overdesk_license_verified');
-      if (verified === 'true') {
-        setIsVerified(true);
+    // Check installation status to see if it is a fresh install, clean deploy, or new launch
+    const checkInstallStatus = async () => {
+      try {
+        const res = await fetch('/api/install-status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.installHash) {
+            const storedHash = localStorage.getItem('overdesk_install_hash');
+            if (storedHash !== data.installHash) {
+              // Fresh installation, build, or deploy - clear active verification and save new hash
+              console.log('[INSTALL STATUS] Fresh installation or update detected. Launching from the license page.');
+              localStorage.removeItem('overdesk_license_verified');
+              localStorage.setItem('overdesk_install_hash', data.installHash);
+              setIsVerified(false);
+            } else {
+              // Regular launch of the same installation
+              const verified = localStorage.getItem('overdesk_license_verified');
+              if (verified === 'true') {
+                setIsVerified(true);
+              }
+            }
+          } else {
+            const verified = localStorage.getItem('overdesk_license_verified');
+            if (verified === 'true') {
+              setIsVerified(true);
+            }
+          }
+        } else {
+          // Fallback if endpoint didn't respond with success
+          const verified = localStorage.getItem('overdesk_license_verified');
+          if (verified === 'true') {
+            setIsVerified(true);
+          }
+        }
+      } catch (err) {
+        console.warn('Unable to verify install status, loading offline fallback state:', err);
+        const verified = localStorage.getItem('overdesk_license_verified');
+        if (verified === 'true') {
+          setIsVerified(true);
+        }
+      } finally {
+        setIsLicenseLoading(false);
       }
-    } catch (e) {
-      console.warn('License status read error', e);
-    }
-    setIsLicenseLoading(false);
+    };
+
+    checkInstallStatus();
 
     // Restore completed (marked-as-done) events
     try {
@@ -545,7 +581,7 @@ export default function App() {
   }
 
   return (
-    <div className={`${isElectron ? 'fixed inset-0 overflow-visible' : 'fixed inset-0 overflow-visible flex items-center justify-center'} select-none bg-transparent text-slate-800`}>
+    <div className="fixed inset-0 overflow-visible pointer-events-none select-none bg-transparent text-slate-800">
       
       {/* 1. Main Desktop utility Widget */}
       <div
@@ -557,7 +593,7 @@ export default function App() {
           position: 'absolute',
           left: isElectron ? '80px' : `${position.x}px`,
           top: isElectron ? '80px' : `${position.y}px`,
-          width: minimized && !isBubble ? '390px' : isBubble ? '54px' : '350px',
+          width: minimized && !isBubble ? '350px' : isBubble ? '54px' : '350px',
         }}
         onDoubleClick={(e) => {
           const target = e.target as HTMLElement;

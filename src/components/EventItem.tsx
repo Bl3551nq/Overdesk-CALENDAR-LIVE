@@ -78,6 +78,19 @@ export const EventItem: React.FC<EventItemProps> = ({
     return parts.join(' · ');
   };
 
+  const getBellActiveColor = (impact: string) => {
+    switch (impact) {
+      case 'High':
+        return 'text-red-500 hover:text-red-650 dark:text-red-400 dark:hover:text-red-300';
+      case 'Medium':
+        return 'text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300';
+      case 'Low':
+        return 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300';
+      default:
+        return 'text-slate-500 hover:text-slate-650 dark:text-neutral-400 dark:hover:text-neutral-300';
+    }
+  };
+
   const timeStr = formatEventTime(event.date);
   const cur = event.country.toUpperCase();
   const impactClass = getImpactClass(event.impact);
@@ -178,7 +191,7 @@ export const EventItem: React.FC<EventItemProps> = ({
             className={`flex items-center justify-center p-1 rounded-full cursor-pointer hover:bg-neutral-500/10 dark:hover:bg-white/10 transition-all text-xs active:scale-90 select-none ${
               isAlarmDisabled 
                 ? 'text-slate-400 dark:text-neutral-500/80 hover:text-slate-500 dark:hover:text-neutral-300' 
-                : 'text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300'
+                : getBellActiveColor(event.impact)
             }`}
             title={isAlarmDisabled ? "Turn ON 5-minute Alarm Warning" : "Turn OFF 5-minute Alarm Warning"}
           >
