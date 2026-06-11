@@ -67,10 +67,10 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 350,
-    height: 520,
-    minHeight: 30,
-    minWidth: 50,
+    width: 430, // 350 + 80px buffer for transparent shadow spacing
+    height: 600, // 520 + 80px buffer for transparent shadow spacing
+    minHeight: 110,
+    minWidth: 130,
     title: "Overdesk FX Calendar",
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
@@ -83,7 +83,11 @@ function createWindow() {
     transparent: true,
     autoHideMenuBar: true,
     hasShadow: true,
+    alwaysOnTop: true, // Always on top by default
   });
+
+  // Keep window floated at highest z-order level across spaces/fullscreens
+  mainWindow.setAlwaysOnTop(true, 'screen-saver');
 
   // Load the Express server url
   mainWindow.loadURL('http://localhost:3000');
@@ -137,7 +141,7 @@ function createTray() {
     {
       label: 'Always on Top',
       type: 'checkbox',
-      checked: false,
+      checked: true,
       click: (menuItem) => {
         if (mainWindow) {
           mainWindow.setAlwaysOnTop(menuItem.checked);

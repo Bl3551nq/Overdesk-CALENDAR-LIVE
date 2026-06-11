@@ -15,6 +15,8 @@ interface EventItemProps {
 
 export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onToggleComplete, index, use24Hour, isDarkMode, showActual, showForecast, showPrevious }) => {
   const [isDismissing, setIsDismissing] = React.useState(false);
+  // Freeze the index at Mount so that animation delay stays fixed and does not cause a "refresh/re-trigger" when items are dismissed
+  const [initialIndex] = React.useState(index);
 
   // Flag system mappings
   const getFlagUrl = (cur: string) => {
@@ -69,7 +71,7 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
   return (
     <div
       style={{ 
-        animationDelay: `${index * 0.05}s`
+        animationDelay: `${initialIndex * 0.05}s`
       }}
       className={`news-item select-none ${isCompleted ? 'opacity-25 pointer-events-none scale-95 origin-center' : ''} ${isDismissing ? 'dismissing' : ''}`}
     >
@@ -148,7 +150,7 @@ export const EventItem: React.FC<EventItemProps> = ({ event, isCompleted, onTogg
         </span>
 
         {/* Controls row */}
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <div className="flex items-center gap-1.5 mt-0.5" style={{ paddingRight: '5px' }}>
           {/* Complete Check button wrapper */}
           <button
             type="button"

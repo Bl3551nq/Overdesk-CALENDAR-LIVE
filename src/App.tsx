@@ -60,7 +60,8 @@ export default function App() {
           const w = Math.ceil(rect.width);
           const h = Math.ceil(rect.height);
           if (w > 0 && h > 0) {
-            (window as any).electronAPI.resizeWindow(w, h);
+            // Add a buffer (40px padding on each side = 80px total) to the resized window to allow shadows to render smoothly without cropping!
+            (window as any).electronAPI.resizeWindow(w + 80, h + 80);
           }
         }
       });
@@ -289,13 +290,25 @@ export default function App() {
 
   // --- AUDIO CONTROLS MANAGER ---
   const playSoundFile = (soundKey: string) => {
+    // Check if we have a direct HTTP/HTTPS URL (like our raw GitHub mp3 links)
+    const dataUri = SOUND_DATA[soundKey];
+    if (dataUri && (dataUri.startsWith('http://') || dataUri.startsWith('https://'))) {
+      try {
+        const audio = new Audio(dataUri);
+        audio.volume = 0.65;
+        audio.play().catch(err => console.log('[Audio] Autoplay blocked, wait for user interact', err));
+      } catch (e) {
+        console.error('[Audio] Execution error playing audio file', e);
+      }
+      return;
+    }
+
     // First try the robust real-time Web Audio API synthesizer
     if (playSynthesizedSound(soundKey)) {
       return;
     }
     
     // Fall back to pre-recorded base64 data URI if not covered by synthesizers
-    const dataUri = SOUND_DATA[soundKey];
     if (!dataUri) return;
     try {
       const audio = new Audio(dataUri);
@@ -308,7 +321,8 @@ export default function App() {
 
   const triggerRings = (soundKey: string, times: number) => {
     for (let i = 0; i < times; i++) {
-      setTimeout(() => playSoundFile(soundKey), i * 1500);
+      // 2.5 seconds delay between rings ensures beautiful sequential bell tolls
+      setTimeout(() => playSoundFile(soundKey), i * 2500);
     }
   };
 
@@ -454,9 +468,21 @@ export default function App() {
         onTouchStart={isElectron ? undefined : onTouchStart}
         style={{
           position: 'absolute',
-          left: isElectron ? '0px' : `${position.x}px`,
-          top: isElectron ? '0px' : `${position.y}px`,
+          left: isElectron ? '40px' : `${position.x}px`,
+          top: isElectron ? '40px' : `${position.y}px`,
           width: minimized && !isBubble ? '390px' : isBubble ? '54px' : '350px',
+        }}
+        onDoubleClick={(e) => {
+          const target = e.target as HTMLElement;
+          // Don't action if clicking on interactive elements like buttons, inputs, select or complete circles
+          if (target.closest('button, input, select, .done-circle, span.nav-btn')) {
+            return;
+          }
+          if (isBubble) {
+            setIsBubble(false);
+          } else {
+            setMinimized(prev => !prev);
+          }
         }}
         onClick={(e) => {
           // If we drag, don't execute the click action (e.g., restoring the bubble)
@@ -579,7 +605,7 @@ export default function App() {
               <div className="news-list select-none">
                 {filteredEvents.map((ev, index) => (
                   <EventItem
-                    key={`${ev.title}-${ev.date}-${index}`}
+                    key={`${ev.title}-${ev.date}`}
                     event={ev}
                     index={index}
                     use24Hour={use24Hour}
@@ -604,7 +630,7 @@ export default function App() {
 
             {/* B. Minimized scrolling stock ticker marquee */}
             <Ticker 
-              events={mergedEvents.filter(ev => ev.country === 'USD' || ev.impact === 'High' || ev.impact === 'Medium')} 
+              events={filteredEvents} 
               use24Hour={use24Hour}
               isDarkMode={isDarkMode}
             />

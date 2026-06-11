@@ -15,8 +15,13 @@ export function useDrag(initialX = 40, initialY = 40) {
 
   // Center position on mount if we want, or keep initial
   useEffect(() => {
-    const x = Math.max(20, (window.innerWidth - 350) / 2);
-    const y = Math.max(20, (window.innerHeight - 600) / 2);
+    const widgetWidth = 350;
+    const widgetHeight = 520;
+    
+    // Smoothly calculate center coordinates while maintaining safe minimum margins
+    const x = Math.max(10, (window.innerWidth - widgetWidth) / 2);
+    const y = Math.max(10, (window.innerHeight - widgetHeight) / 2);
+    
     setPosition({ x, y });
     positionRef.current = { x, y };
     if (elementRef.current) {

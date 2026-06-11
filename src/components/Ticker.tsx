@@ -45,7 +45,7 @@ export function Ticker({ events, use24Hour, isDarkMode }: TickerProps) {
   };
 
   const activeEvents = events.length > 0 ? events : [
-    { title: "No incoming news scheduled for today", country: "USD", impact: "Low" as const, date: new Date().toISOString() }
+    { title: "No scheduled news announcements active", country: "USD", impact: "Low" as const, date: new Date().toISOString() }
   ];
 
   // Render events inside ticker tracker

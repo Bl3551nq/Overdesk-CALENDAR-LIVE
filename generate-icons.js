@@ -44,12 +44,17 @@ async function main() {
     }
 
     console.log('Loading source PNG with Jimp...');
-    const image = await Jimp.read(inputPath);
+    let image = await Jimp.read(inputPath);
     console.log('Original dimensions:', image.width, 'x', image.height);
 
-    // Resize the image so it fits neatly inside a transparent 256x256 square
-    console.log('Centering and resizing to a 256x256 square canvas...');
-    const resized = image.contain({ w: 256, h: 256 });
+    // Autocrop transparent borders to maximize logo visibility on taskbar
+    console.log('Autocropping transparent borders...');
+    image = image.autocrop();
+    console.log('Autocropped dimensions:', image.width, 'x', image.height);
+
+    // Centering and resizing to a 256x256 canvas with optimal safety padding
+    console.log('Centering and scaling up to 256x256 square with appropriate padding...');
+    const resized = image.contain({ w: 232, h: 232 }).contain({ w: 256, h: 256 });
 
     // Save as temporary square PNG
     await resized.write(squarePngPath);
