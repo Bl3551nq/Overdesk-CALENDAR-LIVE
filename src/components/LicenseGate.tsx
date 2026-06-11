@@ -84,6 +84,14 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess }: LicenseGate
     }
   };
 
+  const handleClose = () => {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      (window as any).electronAPI.closeWindow();
+    } else {
+      setStatus({ msg: 'Please enter a valid license key to unlock and enter the application.', type: 'err' });
+    }
+  };
+
   return (
     <div id="overdesk-activation-gate" className={isDarkMode ? 'dark' : ''}>
       <style>{`
@@ -568,7 +576,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess }: LicenseGate
 
       <div className="card">
         <div className="top-bar">
-          <button className="close-btn" onClick={onVerifySuccess} title="Close activation window">
+          <button className="close-btn" onClick={handleClose} title="Close activation window">
             <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
