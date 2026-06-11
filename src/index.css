@@ -8,6 +8,14 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: visible !important;
+  pointer-events: none !important;
+}
+
+/* Enable clicks on actual interactive application zones */
+.widget,
+#overdesk-activation-gate,
+.settings-overlay {
+  pointer-events: auto !important;
 }
 
 @theme {
@@ -93,8 +101,11 @@ body.dark .blob {
 .widget .card-container,
 .widget .toggle-wrap,
 .widget .ticker-wrap,
-.widget .win-btns {
-  -webkit-app-region: no-drag;
+.widget .win-btns,
+.widget .settings-overlay,
+.widget .settings-overlay *,
+.widget .bubble-icon {
+  -webkit-app-region: no-drag !important;
 }
 
 /* Dark mode theme over ride */
@@ -228,11 +239,17 @@ body.dark .widget.bubble {
   display: none;
   font-size: 24px;
   line-height: 1;
-  pointer-events: none;
+  pointer-events: auto !important;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .widget.bubble .bubble-icon {
-  display: block !important;
+  display: flex !important;
 }
 
 /* Cards element Container */
@@ -319,11 +336,51 @@ body.dark .btn-filter {
   max-height: 255px;
   overflow-y: auto;
   padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .news-list::-webkit-scrollbar {
   width: 0px !important;
   background: transparent;
+}
+
+/* Custom premium scrollbar for settings / edit areas to prevent clunky OS scrolls */
+.settings-overlay,
+.settings-overlay * {
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.settings-overlay *::-webkit-scrollbar,
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+.settings-overlay *::-webkit-scrollbar-track,
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.settings-overlay *::-webkit-scrollbar-thumb,
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 200, 0.2) !important;
+  border-radius: 99px !important;
+  transition: background 0.2s;
+}
+
+.settings-overlay *::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 200, 0.35) !important;
+}
+
+body.dark .settings-overlay *::-webkit-scrollbar-thumb,
+body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.dark .settings-overlay *::-webkit-scrollbar-thumb:hover,
+body.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
 }
 
 /* Event list Item fade animations */

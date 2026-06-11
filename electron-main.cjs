@@ -67,8 +67,8 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 430, // 350 + 80px buffer for transparent shadow spacing
-    height: 600, // 520 + 80px buffer for transparent shadow spacing
+    width: 510, // 350 + 160px buffer for transparent shadow spacing (80px on each side)
+    height: 680, // 520 + 160px buffer for transparent shadow spacing (80px on each side)
     minHeight: 110,
     minWidth: 130,
     title: "Overdesk FX Calendar",

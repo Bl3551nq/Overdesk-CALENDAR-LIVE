@@ -60,8 +60,8 @@ export default function App() {
           const w = Math.ceil(rect.width);
           const h = Math.ceil(rect.height);
           if (w > 0 && h > 0) {
-            // Add a buffer (40px padding on each side = 80px total) to the resized window to allow shadows to render smoothly without cropping!
-            (window as any).electronAPI.resizeWindow(w + 80, h + 80);
+            // Add a buffer (80px padding on each side = 160px total) to the resized window to allow shadows to render smoothly without cropping!
+            (window as any).electronAPI.resizeWindow(w + 160, h + 160);
           }
         }
       });
@@ -468,8 +468,8 @@ export default function App() {
         onTouchStart={isElectron ? undefined : onTouchStart}
         style={{
           position: 'absolute',
-          left: isElectron ? '40px' : `${position.x}px`,
-          top: isElectron ? '40px' : `${position.y}px`,
+          left: isElectron ? '80px' : `${position.x}px`,
+          top: isElectron ? '80px' : `${position.y}px`,
           width: minimized && !isBubble ? '390px' : isBubble ? '54px' : '350px',
         }}
         onDoubleClick={(e) => {
