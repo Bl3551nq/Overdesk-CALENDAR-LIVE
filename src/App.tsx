@@ -26,6 +26,7 @@ export default function App() {
   const [showActual, setShowActual] = useState(true);
   const [showForecast, setShowForecast] = useState(true);
   const [showPrevious, setShowPrevious] = useState(true);
+  const [launchOnStart, setLaunchOnStart] = useState(true);
 
   // Filter selections
   const [activeImpacts, setActiveImpacts] = useState<Set<ImpactType>>(
@@ -236,6 +237,24 @@ export default function App() {
     if (storedShowPrevious !== null) {
       setShowPrevious(storedShowPrevious === 'true');
     }
+
+    // Restore or initialize launch on startup preference (defaults to true for clean startup launches on install)
+    const storedLaunchOnStart = localStorage.getItem('overdeskLaunchOnStart');
+    if (storedLaunchOnStart !== null) {
+      const isEnabled = storedLaunchOnStart === 'true';
+      setLaunchOnStart(isEnabled);
+      if (isElectron && (window as any).electronAPI) {
+        (window as any).electronAPI.setLaunchOnStart(isEnabled);
+      }
+    } else {
+      if (isElectron) {
+        setLaunchOnStart(true);
+        localStorage.setItem('overdeskLaunchOnStart', 'true');
+        if ((window as any).electronAPI) {
+          (window as any).electronAPI.setLaunchOnStart(true);
+        }
+      }
+    }
   }, []);
 
   // --- LIVE DATA FETCH EFFECT ---
@@ -370,6 +389,18 @@ export default function App() {
       localStorage.setItem('overdeskUse24Hour', String(use24));
     } catch (e) {
       console.warn('Time format storage error', e);
+    }
+  };
+
+  const saveLaunchOnStartPreference = (enable: boolean) => {
+    setLaunchOnStart(enable);
+    try {
+      localStorage.setItem('overdeskLaunchOnStart', String(enable));
+      if (isElectron && (window as any).electronAPI) {
+        (window as any).electronAPI.setLaunchOnStart(enable);
+      }
+    } catch (e) {
+      console.warn('Launch on startup storage error', e);
     }
   };
 
@@ -810,6 +841,9 @@ export default function App() {
               onApply={handleApplyFilters}
               onCancel={() => setIsFilterOpen(false)}
               onDeactivateLicense={handleDeactivateLicense}
+              isElectron={isElectron}
+              launchOnStart={launchOnStart}
+              onToggleLaunchOnStart={saveLaunchOnStartPreference}
             />
 
           </>

@@ -35,6 +35,19 @@ ipcMain.on('minimize-window', () => {
   }
 });
 
+ipcMain.on('set-launch-on-start', (event, enable) => {
+  try {
+    app.setLoginItemSettings({
+      openAtLogin: enable,
+      openAsHidden: true,
+      path: process.execPath
+    });
+    console.log(`[STARTUP] Dynamic launch-on-start configured: ${enable}`);
+  } catch (err) {
+    console.error('Failed to modify login item settings:', err);
+  }
+});
+
 // Request single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 
