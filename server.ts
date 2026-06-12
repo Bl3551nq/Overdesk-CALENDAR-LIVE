@@ -15,12 +15,12 @@ async function startServer() {
   app.get('/api/install-status', (req, res) => {
     try {
       const packagePath = path.join(process.cwd(), 'package.json');
-      let mtime = Date.now();
+      let version = '0.0.0';
       if (fs.existsSync(packagePath)) {
-        const stats = fs.statSync(packagePath);
-        mtime = stats.mtimeMs;
+        const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        version = pkg.version || '0.0.0';
       }
-      res.json({ success: true, installHash: `mtime-${mtime}` });
+      res.json({ success: true, installHash: `v-${version}` });
     } catch (err) {
       res.json({ success: false, installHash: 'default' });
     }
