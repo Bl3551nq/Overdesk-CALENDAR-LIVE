@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 interface LicenseGateProps {
   isDarkMode: boolean;
   onVerifySuccess: () => void;
+  onCloseApp?: () => void;
 }
 
-export default function LicenseGate({ isDarkMode, onVerifySuccess }: LicenseGateProps) {
+export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }: LicenseGateProps) {
   const [licenseKey, setLicenseKey] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [shake, setShake] = useState(false);
@@ -87,6 +88,8 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess }: LicenseGate
   const handleClose = () => {
     if (typeof window !== 'undefined' && (window as any).electronAPI) {
       (window as any).electronAPI.closeWindow();
+    } else if (onCloseApp) {
+      onCloseApp();
     } else {
       setStatus({ msg: 'Please enter a valid license key to unlock and enter the application.', type: 'err' });
     }

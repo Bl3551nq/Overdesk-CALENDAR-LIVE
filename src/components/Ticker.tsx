@@ -48,6 +48,16 @@ export function Ticker({ events, use24Hour, isDarkMode }: TickerProps) {
     { title: "No scheduled news announcements active", country: "USD", impact: "Low" as const, date: new Date().toISOString() }
   ];
 
+  // Calculate total estimated width of active events to keep marquee speed completely constant
+  const estimatedTotalWidth = activeEvents.reduce((acc, ev) => {
+    const titleLen = ev.title ? ev.title.length : 0;
+    const itemWidth = 115 + Math.min(150, titleLen * 7);
+    return acc + itemWidth;
+  }, 0);
+
+  const speed = 100; // Constant speed in pixels per second
+  const duration = Math.max(8, estimatedTotalWidth / speed);
+
   // Render events inside ticker tracker
   const renderTickerList = () => (
     <>
@@ -85,7 +95,7 @@ export function Ticker({ events, use24Hour, isDarkMode }: TickerProps) {
 
   return (
     <div className="ticker-wrap select-none cursor-grab active:cursor-grabbing">
-      <div className="ticker-track">
+      <div className="ticker-track" style={{ animationDuration: `${duration}s` }}>
         {/* Render twice for continuous seamless loop */}
         <div className="inline-flex items-center shrink-0">
           {renderTickerList()}

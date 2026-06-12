@@ -11,21 +11,6 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API Route: Check installation/build status for clean first launches
-  app.get('/api/install-status', (req, res) => {
-    try {
-      const packagePath = path.join(process.cwd(), 'package.json');
-      let version = '0.0.0';
-      if (fs.existsSync(packagePath)) {
-        const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-        version = pkg.version || '0.0.0';
-      }
-      res.json({ success: true, installHash: `v-${version}` });
-    } catch (err) {
-      res.json({ success: false, installHash: 'default' });
-    }
-  });
-
   // API Route: Verify license
   app.post('/api/license/verify', async (req, res) => {
     const { key } = req.body;

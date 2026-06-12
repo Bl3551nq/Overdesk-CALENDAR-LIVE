@@ -8,7 +8,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: visible !important;
-  pointer-events: none !important;
+  pointer-events: auto !important;
 }
 
 /* Enable clicks on actual interactive application zones */
@@ -90,7 +90,6 @@ body.dark .blob {
     0 4px 12px rgba(100, 110, 240, 0.03),
     0 1px 0 rgba(255, 255, 255, 0.85) inset;
   transition: box-shadow 0.5s, border-color 0.5s, background 0.5s, transform 0.25s, opacity 0.25s;
-  -webkit-app-region: drag;
 }
 
 /* Ensure all interactive features inside the widget receive click/drag events properly in Electron */

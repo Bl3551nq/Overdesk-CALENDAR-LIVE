@@ -16,6 +16,15 @@ ipcMain.on('resize-window', (event, width, height) => {
   }
 });
 
+ipcMain.on('drag-window', (event, delta) => {
+  if (mainWindow && !mainWindow.isDestroyed() && delta) {
+    const [x, y] = mainWindow.getPosition();
+    const dX = Math.round(delta.dX || 0);
+    const dY = Math.round(delta.dY || 0);
+    mainWindow.setPosition(x + dX, y + dY);
+  }
+});
+
 ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.setIgnoreMouseEvents(ignore, options);
@@ -24,7 +33,6 @@ ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
 
 ipcMain.on('close-window', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    // Hidden to tray instead of destroyed
     mainWindow.hide();
   }
 });

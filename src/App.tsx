@@ -15,6 +15,7 @@ export default function App() {
   // --- STATE SYSTEM ---
   const [isVerified, setIsVerified] = useState(false);
   const [isLicenseLoading, setIsLicenseLoading] = useState(true);
+  const [isClosed, setIsClosed] = useState(false);
   const [baseEvents, setBaseEvents] = useState<FxEvent[]>(BUILTIN_DATA);
   const [isLiveOnline, setIsLiveOnline] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(new Date());
@@ -95,6 +96,12 @@ export default function App() {
 
       // 2. PERFECT HOVER MOUSE CLICK-THROUGH (Ignores transparent regions & shadows completely)
       const handleMouseMove = (e: MouseEvent) => {
+        // If the user is actively holding down any mouse buttons (clicking or dragging),
+        // we must never ignore mouse events. This prevents programmatic drag from breaking
+        // if the cursor moves faster than the window moves.
+        if (e.buttons > 0) {
+          return;
+        }
         const target = e.target as HTMLElement | null;
         if (!target) return;
         
@@ -131,52 +138,16 @@ export default function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Check installation status to see if it is a fresh install, clean deploy, or new launch
-    const checkInstallStatus = async () => {
-      try {
-        const res = await fetch('/api/install-status');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.installHash) {
-            const storedHash = localStorage.getItem('overdesk_install_hash');
-            if (storedHash !== data.installHash) {
-              // Fresh installation, build, or deploy - clear active verification and save new hash
-              console.log('[INSTALL STATUS] Fresh installation or update detected. Launching from the license page.');
-              localStorage.removeItem('overdesk_license_verified');
-              localStorage.setItem('overdesk_install_hash', data.installHash);
-              setIsVerified(false);
-            } else {
-              // Regular launch of the same installation
-              const verified = localStorage.getItem('overdesk_license_verified');
-              if (verified === 'true') {
-                setIsVerified(true);
-              }
-            }
-          } else {
-            const verified = localStorage.getItem('overdesk_license_verified');
-            if (verified === 'true') {
-              setIsVerified(true);
-            }
-          }
-        } else {
-          // Fallback if endpoint didn't respond with success
-          const verified = localStorage.getItem('overdesk_license_verified');
-          if (verified === 'true') {
-            setIsVerified(true);
-          }
-        }
-      } catch (err) {
-        console.warn('Unable to verify install status, loading offline fallback state:', err);
-        const verified = localStorage.getItem('overdesk_license_verified');
-        if (verified === 'true') {
-          setIsVerified(true);
-        }
-      } finally {
-        setIsLicenseLoading(false);
+    // Restore license activation status
+    try {
+      const verified = localStorage.getItem('overdesk_license_verified');
+      if (verified === 'true') {
+        setIsVerified(true);
       }
-    };
-
-    checkInstallStatus();
+    } catch (e) {
+      console.warn('License status read error', e);
+    }
+    setIsLicenseLoading(false);
 
     // Restore completed (marked-as-done) events
     try {
@@ -591,6 +562,10 @@ export default function App() {
     setIsFilterOpen(false);
   };
 
+  if (isClosed) {
+    return null;
+  }
+
   if (isLicenseLoading) {
     return (
       <div className={`fixed inset-0 flex items-center justify-center transition-colors duration-500 bg-transparent ${isDarkMode ? 'text-white' : 'text-slate-800'} font-sans`}>
@@ -607,6 +582,7 @@ export default function App() {
       <LicenseGate 
         isDarkMode={isDarkMode} 
         onVerifySuccess={() => setIsVerified(true)} 
+        onCloseApp={() => setIsClosed(true)}
       />
     );
   }
@@ -618,8 +594,8 @@ export default function App() {
       <div
         id="overdesk-widget"
         ref={elementRef}
-        onMouseDown={isElectron ? undefined : onMouseDown}
-        onTouchStart={isElectron ? undefined : onTouchStart}
+        onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
         style={{
           position: 'absolute',
           left: isElectron ? '80px' : `${position.x}px`,
@@ -670,7 +646,7 @@ export default function App() {
               {/* Native macOS style window elements */}
               <div style={{ display: 'flex', width: '54px' }}>
                 <WindowControls 
-                  onClose={() => isElectron ? (window as any).electronAPI.closeWindow() : setIsBubble(true)}
+                  onClose={() => isElectron ? (window as any).electronAPI.closeWindow() : setIsClosed(true)}
                   onMinimize={() => setMinimized(prev => !prev)}
                   onBubbleToggle={() => setIsBubble(true)}
                   minimized={minimized}
