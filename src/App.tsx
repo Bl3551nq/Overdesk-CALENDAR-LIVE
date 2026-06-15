@@ -70,7 +70,7 @@ export default function App() {
   const [disabledAlarms, setDisabledAlarms] = useState<Set<string>>(new Set());
 
   // Drag controls
-  const { position, elementRef, onMouseDown, onTouchStart, hasMovedRef } = useDrag();
+  const { position, elementRef, onPointerDown, hasMovedRef } = useDrag();
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
 
@@ -647,8 +647,7 @@ export default function App() {
       <div
         id="overdesk-widget"
         ref={elementRef}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
+        onPointerDown={onPointerDown}
         style={{
           position: 'absolute',
           left: isElectron ? '0px' : `${position.x}px`,

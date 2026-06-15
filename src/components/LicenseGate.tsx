@@ -597,7 +597,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           />
         </div>
 
-        <div className="app-name">Overdesk FX Calendar</div>
+        <div className="app-name">Overdesk FX Checklist</div>
         <div className="app-sub">Enter your license key to activate.<br />Find it in your Gumroad receipt email.</div>
 
         <div className="divider"></div>
@@ -652,7 +652,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
             </svg>
           </div>
           <div className="s-title">Activated!</div>
-          <div className="s-sub">Your license is confirmed.<br />Overdesk Fx Calendar is ready.</div>
+          <div className="s-sub">Your license is confirmed.<br />Overdesk Fx Checklist is ready.</div>
           <button className="launch-btn" onClick={onVerifySuccess}>
             Launch Fx Calendar →
           </button>

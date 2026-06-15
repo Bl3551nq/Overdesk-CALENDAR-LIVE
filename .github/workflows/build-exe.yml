@@ -34,13 +34,13 @@ jobs:
         run: npm run build
 
       - name: Build Standalone Windows Executable (.exe)
-        run: npx electron-builder --win --publish always
+        run: npx electron-builder --win --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Windows Executable Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Overdesk-FX-Calendar-Setup
+          name: Overdesk-FX-Checklist-Setup
           path: dist-electron/*.exe
           retention-days: 14

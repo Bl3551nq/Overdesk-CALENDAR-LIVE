@@ -1,6 +1,6 @@
 {
-  "appId": "com.overdesk.fxcalendar",
-  "productName": "Overdesk FX Calendar",
+  "appId": "com.overdesk.fxchecklist",
+  "productName": "Overdesk FX Checklist",
   "directories": {
     "output": "dist-electron"
   },
@@ -18,7 +18,14 @@
     "package.json"
   ],
   "win": {
-    "target": ["nsis"],
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
     "icon": "assets/icon.ico"
   },
   "nsis": {
@@ -28,7 +35,7 @@
     "allowToChangeInstallationDirectory": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Overdesk FX Calendar",
+    "shortcutName": "Overdesk FX Checklist",
     "runAfterFinish": true
   }
 }
