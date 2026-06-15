@@ -100,8 +100,8 @@ export default function App() {
             const w = Math.ceil(rect.width);
             const h = Math.ceil(rect.height);
             if (w > 0 && h > 0) {
-              // Add ample transparent padding buffer (80px on each side = 160px) for beautiful blurred shadow casting
-              (window as any).electronAPI.resizeWindow(w + 160, h + 160);
+              // Set window to exact dimensions of the target element, removing any invisible window buffers
+              (window as any).electronAPI.resizeWindow(w, h);
             }
           }
         });
@@ -345,6 +345,10 @@ export default function App() {
       }
     };
     fetchLiveData();
+
+    // Sync live announcement and metric data every 20 seconds for instant real-time updates when minimized
+    const syncInterval = setInterval(fetchLiveData, 20000);
+    return () => clearInterval(syncInterval);
   }, []);
 
   const saveCompleteState = (updated: Set<string>) => {
@@ -514,9 +518,9 @@ export default function App() {
 
             // Turn off alarm if the bell is muted for this specific event
             if (!disabledAlarms.has(key)) {
-              // Ring matching audio chime 3 times
+              // Ring matching audio chime 5 times
               const curSoundKey = SOUND_LIST[soundIndex].key;
-              triggerRings(curSoundKey, 3);
+              triggerRings(curSoundKey, 5);
               console.log(`[FX SYSTEM ALERT] 5-minute incoming news: ${ev.title}`);
             } else {
               console.log(`[FX SYSTEM ALERT] 5-minute incoming news muted (bell off): ${ev.title}`);
@@ -524,7 +528,7 @@ export default function App() {
           }
         }
       });
-    }, 12000); // Poll every 12 seconds
+    }, 5000); // Poll every 5 seconds for high precision live alarms
 
     return () => clearInterval(alertTimer);
   }, [soundEnabled, soundIndex, alertedEvents, disabledAlarms]);
@@ -647,8 +651,8 @@ export default function App() {
         onTouchStart={onTouchStart}
         style={{
           position: 'absolute',
-          left: isElectron ? '80px' : `${position.x}px`,
-          top: isElectron ? '80px' : `${position.y}px`,
+          left: isElectron ? '0px' : `${position.x}px`,
+          top: isElectron ? '0px' : `${position.y}px`,
           width: minimized && !isBubble ? '350px' : isBubble ? '54px' : '350px',
           zoom: windowScale,
         }}

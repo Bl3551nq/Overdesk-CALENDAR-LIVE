@@ -140,11 +140,11 @@ export function FilterPanel({
         </div>
 
         {/* Section: Filter Currencies */}
-        <div className="space-y-2">
-          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
+        <div className="space-y-1.5">
+          <div className="text-[9px] font-extrabold text-slate-500 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
             FILTER CURRENCIES
           </div>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-4 gap-1">
             {MAJOR_CURRENCIES.map((cur) => {
               const active = activeCurrencies.has(cur);
               return (
@@ -153,7 +153,7 @@ export function FilterPanel({
                   type="button"
                   onClick={() => onToggleCurrency(cur)}
                   title={cur}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-0.5 rounded-[16px] border-2 transition-all min-h-[44px] ${
+                  className={`flex items-center justify-center gap-1 py-1 px-0.5 rounded-lg border-[1.5px] transition-all min-h-[30px] ${
                     active
                       ? 'border-[#6366f1] bg-indigo-500/10 text-indigo-600 dark:border-[#a5b4fc] dark:bg-indigo-500/20 dark:text-neutral-100 font-bold'
                       : 'border-transparent bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-neutral-500 opacity-60'
@@ -161,11 +161,12 @@ export function FilterPanel({
                 >
                   <img
                     src={getFlagUrl(cur)}
-                    className="w-5 h-3.5 object-cover rounded-sm border border-neutral-400/20 shrink-0 select-none"
+                    className="w-3.5 h-2.5 object-cover rounded-sm border border-neutral-400/20 shrink-0 select-none"
                     alt=""
                     referrerPolicy="no-referrer"
+                    draggable={false}
                   />
-                  <span className="text-[11px] font-extrabold tracking-wider">{getCountrySymbol(cur)}</span>
+                  <span className="text-[10px] font-bold tracking-wider">{getCountrySymbol(cur)}</span>
                 </button>
               );
             })}

@@ -94,16 +94,17 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 510, // 350 + 160px buffer for transparent shadow spacing (80px on each side)
-    height: 680, // 520 + 160px buffer for transparent shadow spacing (80px on each side)
-    minHeight: 110,
-    minWidth: 130,
+    width: 350, // Match default widget width exactly, no extra transparent padding buffers
+    height: 520, // Match default widget height exactly
+    minHeight: 30, // Enable perfect scale down for 54px compact bubble launcher
+    minWidth: 30, // Enable perfect scale down for 54px compact bubble launcher
     title: "Overdesk FX Calendar",
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.cjs'),
+      backgroundThrottling: false,
     },
     // Frameless and transparent options
     frame: false,

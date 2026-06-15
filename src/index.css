@@ -259,7 +259,7 @@ body.dark .widget.bubble {
   border-radius: 22px;
   border: 1px solid rgba(200, 205, 255, 0.45);
   padding: 14px 14px 8px;
-  box-shadow: 0 4px 20px rgba(100, 110, 200, 0.03), 0 1px 0 rgba(255, 255, 255, 1) inset;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05), 0 0 3px rgba(0, 0, 0, 0.02), 0 1px 0 rgba(255, 255, 255, 1) inset;
   backdrop-filter: blur(10px);
   cursor: default;
 }
@@ -267,7 +267,7 @@ body.dark .widget.bubble {
 body.dark .card-container {
   background: rgba(14, 10, 26, 0.75);
   border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.28), 0 0 4px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
 /* Navigation Buttons */
