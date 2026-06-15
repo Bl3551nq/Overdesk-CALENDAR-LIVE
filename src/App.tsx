@@ -28,6 +28,29 @@ export default function App() {
   const [showForecast, setShowForecast] = useState(true);
   const [showPrevious, setShowPrevious] = useState(true);
   const [launchOnStart, setLaunchOnStart] = useState(true);
+  const [windowScale, setWindowScale] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem('overdeskWindowScale');
+      if (stored) {
+        const parsed = parseFloat(stored);
+        if (!isNaN(parsed) && [2, 1.5, 1.2, 1, 0.7].includes(parsed)) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Read window scale error', e);
+    }
+    return 1.0;
+  });
+
+  const saveWindowScalePreference = (val: number) => {
+    setWindowScale(val);
+    try {
+      localStorage.setItem('overdeskWindowScale', val.toString());
+    } catch (e) {
+      console.warn('Save window scale error', e);
+    }
+  };
 
   // Filter selections
   const [activeImpacts, setActiveImpacts] = useState<Set<ImpactType>>(
@@ -138,94 +161,113 @@ export default function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Restore license activation status
-    try {
-      const verified = localStorage.getItem('overdesk_license_verified');
-      if (verified === 'true') {
-        setIsVerified(true);
+    const initializeApp = async () => {
+      // Restore license activation status
+      try {
+        const verified = localStorage.getItem('overdesk_license_verified');
+        if (verified === 'true') {
+          setIsVerified(true);
+        }
+      } catch (e) {
+        console.warn('License status read error', e);
       }
-    } catch (e) {
-      console.warn('License status read error', e);
-    }
-    setIsLicenseLoading(false);
 
-    // Restore completed (marked-as-done) events
-    try {
-      const storedCompleted = localStorage.getItem('overdeskCompleted');
-      if (storedCompleted) {
-        setCompletedEvents(new Set(JSON.parse(storedCompleted)));
+      // Query server for license file backup/persistence
+      try {
+        const checkRes = await fetch('/api/license/status');
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          if (checkData.success && checkData.key) {
+            localStorage.setItem('overdesk_license_verified', 'true');
+            localStorage.setItem('overdesk_verified_key', checkData.key);
+            setIsVerified(true);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch backup license status from server:', err);
       }
-    } catch (e) {
-      console.warn('Completed read error', e);
-    }
+      setIsLicenseLoading(false);
 
-    // Restore alerts state
-    try {
-      const todayStr = new Date().toLocaleDateString('en-CA');
-      const storedAlerts = localStorage.getItem('overdeskAlerted');
-      if (storedAlerts) {
-        const parsed = JSON.parse(storedAlerts);
-        if (parsed[todayStr]) {
-          setAlertedEvents(new Set(parsed[todayStr]));
+      // Restore completed (marked-as-done) events
+      try {
+        const storedCompleted = localStorage.getItem('overdeskCompleted');
+        if (storedCompleted) {
+          setCompletedEvents(new Set(JSON.parse(storedCompleted)));
+        }
+      } catch (e) {
+        console.warn('Completed read error', e);
+      }
+
+      // Restore alerts state
+      try {
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        const storedAlerts = localStorage.getItem('overdeskAlerted');
+        if (storedAlerts) {
+          const parsed = JSON.parse(storedAlerts);
+          if (parsed[todayStr]) {
+            setAlertedEvents(new Set(parsed[todayStr]));
+          }
+        }
+      } catch (e) {
+        console.warn('Alerts read error', e);
+      }
+
+      // Restore disabled alarms state
+      try {
+        const storedMuted = localStorage.getItem('overdeskDisabledAlarms');
+        if (storedMuted) {
+          setDisabledAlarms(new Set<string>(JSON.parse(storedMuted) as string[]));
+        }
+      } catch (e) {
+        console.warn('Disabled alarms read error', e);
+      }
+
+      // Restore theme preference
+      const storedTheme = localStorage.getItem('overdeskTheme');
+      if (storedTheme) {
+        setIsDarkMode(storedTheme === 'dark');
+      }
+
+      // Restore time format preference (12/24 hour display)
+      const storedUse24 = localStorage.getItem('overdeskUse24Hour');
+      if (storedUse24 !== null) {
+        setUse24Hour(storedUse24 === 'true');
+      }
+
+      // Restore metric visibility preferences
+      const storedShowActual = localStorage.getItem('overdeskShowActual');
+      if (storedShowActual !== null) {
+        setShowActual(storedShowActual === 'true');
+      }
+      const storedShowForecast = localStorage.getItem('overdeskShowForecast');
+      if (storedShowForecast !== null) {
+        setShowForecast(storedShowForecast === 'true');
+      }
+      const storedShowPrevious = localStorage.getItem('overdeskShowPrevious');
+      if (storedShowPrevious !== null) {
+        setShowPrevious(storedShowPrevious === 'true');
+      }
+
+      // Restore or initialize launch on startup preference (defaults to true for clean startup launches on install)
+      const storedLaunchOnStart = localStorage.getItem('overdeskLaunchOnStart');
+      if (storedLaunchOnStart !== null) {
+        const isEnabled = storedLaunchOnStart === 'true';
+        setLaunchOnStart(isEnabled);
+        if (isElectron && (window as any).electronAPI) {
+          (window as any).electronAPI.setLaunchOnStart(isEnabled);
+        }
+      } else {
+        if (isElectron) {
+          setLaunchOnStart(true);
+          localStorage.setItem('overdeskLaunchOnStart', 'true');
+          if ((window as any).electronAPI) {
+            (window as any).electronAPI.setLaunchOnStart(true);
+          }
         }
       }
-    } catch (e) {
-      console.warn('Alerts read error', e);
-    }
+    };
 
-    // Restore disabled alarms state
-    try {
-      const storedMuted = localStorage.getItem('overdeskDisabledAlarms');
-      if (storedMuted) {
-        setDisabledAlarms(new Set<string>(JSON.parse(storedMuted) as string[]));
-      }
-    } catch (e) {
-      console.warn('Disabled alarms read error', e);
-    }
-
-    // Restore theme preference
-    const storedTheme = localStorage.getItem('overdeskTheme');
-    if (storedTheme) {
-      setIsDarkMode(storedTheme === 'dark');
-    }
-
-    // Restore time format preference (12/24 hour display)
-    const storedUse24 = localStorage.getItem('overdeskUse24Hour');
-    if (storedUse24 !== null) {
-      setUse24Hour(storedUse24 === 'true');
-    }
-
-    // Restore metric visibility preferences
-    const storedShowActual = localStorage.getItem('overdeskShowActual');
-    if (storedShowActual !== null) {
-      setShowActual(storedShowActual === 'true');
-    }
-    const storedShowForecast = localStorage.getItem('overdeskShowForecast');
-    if (storedShowForecast !== null) {
-      setShowForecast(storedShowForecast === 'true');
-    }
-    const storedShowPrevious = localStorage.getItem('overdeskShowPrevious');
-    if (storedShowPrevious !== null) {
-      setShowPrevious(storedShowPrevious === 'true');
-    }
-
-    // Restore or initialize launch on startup preference (defaults to true for clean startup launches on install)
-    const storedLaunchOnStart = localStorage.getItem('overdeskLaunchOnStart');
-    if (storedLaunchOnStart !== null) {
-      const isEnabled = storedLaunchOnStart === 'true';
-      setLaunchOnStart(isEnabled);
-      if (isElectron && (window as any).electronAPI) {
-        (window as any).electronAPI.setLaunchOnStart(isEnabled);
-      }
-    } else {
-      if (isElectron) {
-        setLaunchOnStart(true);
-        localStorage.setItem('overdeskLaunchOnStart', 'true');
-        if ((window as any).electronAPI) {
-          (window as any).electronAPI.setLaunchOnStart(true);
-        }
-      }
-    }
+    initializeApp();
   }, []);
 
   // --- LIVE DATA FETCH EFFECT ---
@@ -553,13 +595,20 @@ export default function App() {
     handleToggleActual(true);
     handleToggleForecast(true);
     handleTogglePrevious(true);
+    saveWindowScalePreference(1.0);
     setIsFilterOpen(false);
   };
 
-  const handleDeactivateLicense = () => {
+  const handleDeactivateLicense = async () => {
     localStorage.removeItem('overdesk_license_verified');
+    localStorage.removeItem('overdesk_verified_key');
     setIsVerified(false);
     setIsFilterOpen(false);
+    try {
+      await fetch('/api/license/deactivate', { method: 'POST' });
+    } catch (e) {
+      console.warn('Deactivate post failed', e);
+    }
   };
 
   if (isClosed) {
@@ -601,6 +650,7 @@ export default function App() {
           left: isElectron ? '80px' : `${position.x}px`,
           top: isElectron ? '80px' : `${position.y}px`,
           width: minimized && !isBubble ? '350px' : isBubble ? '54px' : '350px',
+          zoom: windowScale,
         }}
         onDoubleClick={(e) => {
           const target = e.target as HTMLElement;
@@ -640,7 +690,7 @@ export default function App() {
           <>
               {/* Top Bar macOS Buttons drag strip */}
             <div 
-              className="top-bar cursor-grab active:cursor-grabbing select-none"
+              className="top-bar select-none"
               style={{ display: 'grid', gridTemplateColumns: '54px 1fr 54px', alignItems: 'center', marginBottom: '12px' }}
             >
               {/* Native macOS style window elements */}
@@ -820,6 +870,8 @@ export default function App() {
               isElectron={isElectron}
               launchOnStart={launchOnStart}
               onToggleLaunchOnStart={saveLaunchOnStartPreference}
+              windowScale={windowScale}
+              onChangeWindowScale={saveWindowScalePreference}
             />
 
           </>

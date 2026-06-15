@@ -94,7 +94,7 @@ export function Ticker({ events, use24Hour, isDarkMode }: TickerProps) {
   );
 
   return (
-    <div className="ticker-wrap select-none cursor-grab active:cursor-grabbing">
+    <div className="ticker-wrap select-none">
       <div className="ticker-track" style={{ animationDuration: `${duration}s` }}>
         {/* Render twice for continuous seamless loop */}
         <div className="inline-flex items-center shrink-0">

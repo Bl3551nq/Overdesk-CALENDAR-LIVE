@@ -28,6 +28,8 @@ interface FilterPanelProps {
   isElectron?: boolean;
   launchOnStart?: boolean;
   onToggleLaunchOnStart?: (val: boolean) => void;
+  windowScale: number;
+  onChangeWindowScale: (val: number) => void;
 }
 
 export function FilterPanel({
@@ -55,7 +57,9 @@ export function FilterPanel({
   onDeactivateLicense,
   isElectron = false,
   launchOnStart = true,
-  onToggleLaunchOnStart
+  onToggleLaunchOnStart,
+  windowScale = 1.0,
+  onChangeWindowScale
 }: FilterPanelProps) {
   if (!isOpen) return null;
 
@@ -312,6 +316,36 @@ export function FilterPanel({
               >
                 24 Hour
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Window Scale display options */}
+        <div className="space-y-3 pt-3 border-t border-indigo-500/10 dark:border-white/5">
+          <div className="text-[10px] font-extrabold text-slate-600 dark:text-neutral-400 tracking-wider uppercase select-none font-sans">
+            📐 WINDOW DISPLAY SCALE
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-300 font-sans">
+              UI Scale
+            </span>
+            
+            <div className="flex items-center bg-slate-100 dark:bg-neutral-800 p-0.5 rounded-lg border border-indigo-500/10 dark:border-white/5 font-sans overflow-x-auto">
+              {[2, 1.5, 1.2, 1, 0.7].map((scale) => (
+                <button
+                  key={scale}
+                  type="button"
+                  onClick={() => onChangeWindowScale(scale)}
+                  className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all duration-155 shrink-0 select-none ${
+                    windowScale === scale 
+                      ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  x{scale}
+                </button>
+              ))}
             </div>
           </div>
         </div>

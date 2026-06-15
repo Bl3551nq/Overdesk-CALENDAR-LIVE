@@ -8,7 +8,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: visible !important;
-  pointer-events: auto !important;
+  pointer-events: none !important;
 }
 
 /* Enable clicks on actual interactive application zones */
@@ -75,7 +75,7 @@ body.dark .blob {
   position: absolute;
   z-index: 10;
   overflow: hidden;
-  cursor: grab;
+  cursor: default;
   user-select: none;
   border-radius: 36px;
   /* Light mode: beautiful soft glass light-blue/indigo theme */
@@ -217,7 +217,7 @@ body.dark .date-label {
   border-radius: 50% !important;
   padding: 0 !important;
   overflow: hidden !important;
-  cursor: grab !important;
+  cursor: default !important;
   display: flex;
   align-items: center;
   justify-content: center;

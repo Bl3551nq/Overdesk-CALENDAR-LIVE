@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -10,6 +11,57 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  const getLicenseFilePath = () => {
+    return path.join(os.homedir(), '.overdesk_license.json');
+  };
+
+  const saveLicenseLocally = (licenseKey: string) => {
+    try {
+      const filePath = getLicenseFilePath();
+      fs.writeFileSync(filePath, JSON.stringify({
+        license_key: licenseKey,
+        verified_at: new Date().toISOString()
+      }, null, 2), 'utf8');
+    } catch (writeErr) {
+      console.error('Failed to save license locally:', writeErr);
+    }
+  };
+
+  // API Route: Get local license verification status at startup
+  app.get('/api/license/status', (req, res) => {
+    try {
+      const filePath = getLicenseFilePath();
+      if (fs.existsSync(filePath)) {
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const parsed = JSON.parse(fileContent);
+        if (parsed && parsed.license_key) {
+          return res.json({
+            success: true,
+            key: parsed.license_key
+          });
+        }
+      }
+      return res.json({ success: false });
+    } catch (err) {
+      console.error('Error reading persistent license configuration:', err);
+      return res.json({ success: false });
+    }
+  });
+
+  // API Route: Deactivate license (deletes file backup)
+  app.post('/api/license/deactivate', (req, res) => {
+    try {
+      const filePath = getLicenseFilePath();
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return res.json({ success: true, message: 'License deactivated locally.' });
+    } catch (err) {
+      console.error('Error removing persistent license file:', err);
+      return res.status(500).json({ success: false, error: 'Failed to deactivate license on disk.' });
+    }
+  });
 
   // API Route: Verify license
   app.post('/api/license/verify', async (req, res) => {
@@ -26,6 +78,7 @@ async function startServer() {
     const testCleanKey2 = 'GUMROADTESTACTIVELICENSE32CH';
 
     if (cleanKey === testCleanKey1 || cleanKey === testCleanKey2) {
+      saveLicenseLocally(sanitizedKey);
       return res.json({
         success: true,
         message: 'License key validated successfully!',
@@ -56,6 +109,7 @@ async function startServer() {
           });
         }
 
+        saveLicenseLocally(sanitizedKey);
         return res.json({
           success: true,
           message: 'License key validated successfully!',
