@@ -83,7 +83,7 @@ export default function App() {
 
       const setupObserver = () => {
         const targetEl = document.getElementById('overdesk-widget') || 
-                         document.querySelector('#overdesk-activation-gate .card');
+                         document.querySelector('#overdesk-activation-gate .gate-card-wrapper');
         
         if (!targetEl) return;
         if (currentObserved === targetEl) return;
@@ -647,40 +647,51 @@ export default function App() {
       <div
         id="overdesk-widget"
         ref={elementRef}
-        onPointerDown={onPointerDown}
         style={{
           position: 'absolute',
           left: isElectron ? '0px' : `${position.x}px`,
           top: isElectron ? '0px' : `${position.y}px`,
-          width: minimized && !isBubble ? '350px' : isBubble ? '54px' : '350px',
+          padding: '32px', // Invisible padding area to fully contain the gorgeous soft drop shadows
+          pointerEvents: 'none', // Lets user click right through the shadow padding
+          display: 'inline-block',
+          boxSizing: 'border-box',
           zoom: windowScale,
         }}
-        onDoubleClick={(e) => {
-          const target = e.target as HTMLElement;
-          // Don't action if clicking on interactive elements like buttons, inputs, select or complete circles
-          if (target.closest('button, input, select, .done-circle, span.nav-btn')) {
-            return;
-          }
-          if (isBubble) {
-            setIsBubble(false);
-          } else {
-            setMinimized(prev => !prev);
-          }
-        }}
-        onClick={(e) => {
-          // If we drag, don't execute the click action (e.g., restoring the bubble)
-          if (hasMovedRef.current) {
-            e.stopPropagation();
-            return;
-          }
-          // If in bubble compact mode, click anywhere to restore
-          if (isBubble) {
-            e.stopPropagation();
-            setIsBubble(false);
-          }
-        }}
-        className={`widget ${minimized ? 'minimized' : ''} ${isFilterOpen ? 'filter-open' : ''} ${isBubble ? 'bubble' : ''}`}
       >
+        <div
+          className={`widget ${minimized ? 'minimized' : ''} ${isFilterOpen ? 'filter-open' : ''} ${isBubble ? 'bubble' : ''}`}
+          onPointerDown={onPointerDown}
+          onDoubleClick={(e) => {
+            const target = e.target as HTMLElement;
+            // Don't action if clicking on interactive elements like buttons, inputs, select or complete circles
+            if (target.closest('button, input, select, .done-circle, span.nav-btn')) {
+              return;
+            }
+            if (isBubble) {
+              setIsBubble(false);
+            } else {
+              setMinimized(prev => !prev);
+            }
+          }}
+          onClick={(e) => {
+            // If we drag, don't execute the click action (e.g., restoring the bubble)
+            if (hasMovedRef.current) {
+              e.stopPropagation();
+              return;
+            }
+            // If in bubble compact mode, click anywhere to restore
+            if (isBubble) {
+              e.stopPropagation();
+              setIsBubble(false);
+            }
+          }}
+          style={{
+            pointerEvents: 'auto', // Capture mouse interactions on the active widget
+            width: minimized && !isBubble ? '350px' : isBubble ? '54px' : '350px',
+            margin: '0',
+            position: 'relative', // Honors the parent padding
+          }}
+        >
         {/* Compact Bubble launcher icon (Shown only if bubble=true) */}
         {isBubble && (
           <div className="bubble-icon select-none cursor-pointer" title="Expand Widget">
@@ -879,6 +890,7 @@ export default function App() {
 
           </>
         )}
+        </div>
       </div>
 
     </div>

@@ -141,7 +141,15 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
             radial-gradient(ellipse 50% 40% at 75% 65%, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
         }
 
+        #overdesk-activation-gate .gate-card-wrapper {
+          padding: 32px;
+          display: inline-block;
+          pointer-events: none;
+          background: transparent;
+        }
+
         #overdesk-activation-gate .card {
+          pointer-events: auto;
           width: 350px;
           border-radius: 32px;
           background: linear-gradient(150deg, #ffffff 0%, #f0f0ff 25%, #e4eaff 55%, #ede8ff 100%);
@@ -588,7 +596,8 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
 
       `}</style>
 
-      <div className="card">
+      <div className="gate-card-wrapper">
+        <div className="card">
         <div className="top-bar">
           <button className="close-btn" onClick={handleClose} title="Close activation window">
             <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round">
@@ -670,5 +679,6 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         </div>
       </div>
     </div>
+  </div>
   );
 }
