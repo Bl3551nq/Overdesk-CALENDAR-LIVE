@@ -109,6 +109,16 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           overflow: hidden;
           transition: background 0.5s ease;
+          -webkit-app-region: drag !important;
+        }
+
+        #overdesk-activation-gate button,
+        #overdesk-activation-gate input,
+        #overdesk-activation-gate a,
+        #overdesk-activation-gate span,
+        #overdesk-activation-gate select,
+        #overdesk-activation-gate .win-btn {
+          -webkit-app-region: no-drag !important;
         }
 
         #overdesk-activation-gate.dark {
@@ -144,6 +154,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           overflow: hidden;
           position: relative;
           transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+          -webkit-app-region: drag !important;
         }
 
         #overdesk-activation-gate.dark .card {

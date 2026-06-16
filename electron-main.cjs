@@ -2,6 +2,10 @@ const { app, BrowserWindow, Tray, Menu, nativeImage, dialog, ipcMain } = require
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
+// Force clean custom namespace for OS AppData registry, storage, logs, and updates
+app.name = 'Overdesk FX Checklist';
+app.setName('Overdesk FX Checklist');
+
 // Ensure production mode
 process.env.NODE_ENV = 'production';
 

@@ -71,11 +71,12 @@ body.dark .blob {
 
 /* Float Widget styling */
 .widget {
+  -webkit-app-region: drag !important;
   min-height: 52px;
   position: absolute;
   z-index: 10;
   overflow: hidden;
-  cursor: default;
+  cursor: grab;
   user-select: none;
   border-radius: 36px;
   /* Light mode: beautiful soft glass light-blue/indigo theme */

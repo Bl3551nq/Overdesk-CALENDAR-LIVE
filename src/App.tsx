@@ -70,7 +70,7 @@ export default function App() {
   const [disabledAlarms, setDisabledAlarms] = useState<Set<string>>(new Set());
 
   // Drag controls
-  const { position, elementRef, onPointerDown, hasMovedRef } = useDrag();
+  const { position, elementRef, onPointerDown, hasMovedRef } = useDrag(40, 40, windowScale);
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
 
