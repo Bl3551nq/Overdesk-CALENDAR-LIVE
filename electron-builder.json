@@ -1,6 +1,6 @@
 {
-  "appId": "com.overdesk.fxchecklist",
-  "productName": "Overdesk FX Checklist",
+  "appId": "com.overdesk.fxcalendar",
+  "productName": "Overdesk FX Calendar",
   "directories": {
     "output": "dist-electron"
   },
@@ -35,7 +35,7 @@
     "allowToChangeInstallationDirectory": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Overdesk FX Checklist",
+    "shortcutName": "Overdesk FX Calendar",
     "runAfterFinish": true
   }
 }

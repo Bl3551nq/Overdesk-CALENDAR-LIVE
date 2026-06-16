@@ -427,7 +427,7 @@ export function FilterPanel({
 
       {/* Bottom Brand Stamp */}
       <div className="text-[9px] font-extrabold tracking-widest text-slate-400 dark:text-slate-500 text-center mt-3 uppercase font-sans">
-        OVERDESK FX CHECKLIST
+        OVERDESK FX CALENDAR
       </div>
 
     </div>

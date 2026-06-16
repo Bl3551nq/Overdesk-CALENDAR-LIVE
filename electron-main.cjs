@@ -3,8 +3,8 @@ const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
 // Force clean custom namespace for OS AppData registry, storage, logs, and updates
-app.name = 'Overdesk FX Checklist';
-app.setName('Overdesk FX Checklist');
+app.name = 'Overdesk FX Calendar';
+app.setName('Overdesk FX Calendar');
 
 // Ensure production mode
 process.env.NODE_ENV = 'production';
@@ -102,7 +102,7 @@ function createWindow() {
     height: 520, // Match default widget height exactly
     minHeight: 30, // Enable perfect scale down for 54px compact bubble launcher
     minWidth: 30, // Enable perfect scale down for 54px compact bubble launcher
-    title: "Overdesk FX Checklist",
+    title: "Overdesk FX Calendar",
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       nodeIntegration: false,
@@ -163,7 +163,7 @@ function createTray() {
   
   const contextMenu = Menu.buildFromTemplate([
     { 
-      label: 'Open Overdesk FX Checklist', 
+      label: 'Open Overdesk FX Calendar', 
       className: 'tray-open-item',
       click: () => {
         if (mainWindow) {
@@ -192,7 +192,7 @@ function createTray() {
     }
   ]);
   
-  tray.setToolTip('Overdesk FX Checklist');
+  tray.setToolTip('Overdesk FX Calendar');
   tray.setContextMenu(contextMenu);
   
   // Standard toggle behavior when clicking the tray icon
@@ -250,7 +250,7 @@ function initAutoUpdater() {
   });
 
   autoUpdater.on('update-not-available', () => {
-    console.log('Already running the latest version of Overdesk FX Checklist.');
+    console.log('Already running the latest version of Overdesk FX Calendar.');
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
@@ -263,7 +263,7 @@ function initAutoUpdater() {
     dialog.showMessageBox({
       type: 'info',
       title: 'Update Ready to Install',
-      message: `A new version (${info.version}) of Overdesk FX Checklist has been successfully downloaded in the background.\n\nWould you like to restart the application now to apply the update?`,
+      message: `A new version (${info.version}) of Overdesk FX Calendar has been successfully downloaded in the background.\n\nWould you like to restart the application now to apply the update?`,
       buttons: ['Restart and Update Now', 'Install on Exit'],
       defaultId: 0,
       cancelId: 1

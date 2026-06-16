@@ -1,5 +1,5 @@
 {
-  "name": "Overdesk FX Checklist",
+  "name": "Overdesk FX Calendar",
   "description": "A floating economic calendar widget with high-fidelity asset alert sounds, customizable currency/impact filters, and beautiful light and dark modes.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
