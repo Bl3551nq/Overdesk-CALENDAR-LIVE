@@ -213,6 +213,7 @@ body.dark .date-label {
 
 /* Bubble Compact Mode Circle Shape */
 .widget.bubble {
+  -webkit-app-region: no-drag !important;
   width: 54px !important;
   height: 54px !important;
   border-radius: 50% !important;

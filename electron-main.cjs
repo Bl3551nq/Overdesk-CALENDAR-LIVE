@@ -63,6 +63,10 @@ ipcMain.on('set-launch-on-start', (event, enable) => {
 // Request single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 
+// Fix DPI scaling mismatch on Windows high-resolution displays
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('force-device-scale-factor', '1');
+
 if (!gotTheLock) {
   app.quit();
 } else {

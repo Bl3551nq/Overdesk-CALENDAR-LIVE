@@ -21,6 +21,12 @@ export default function App() {
   const [viewDate, setViewDate] = useState<Date>(new Date());
   const [minimized, setMinimized] = useState(false);
   const [isBubble, setIsBubble] = useState(false);
+  
+  const isBubbleRef = useRef(isBubble);
+  useEffect(() => {
+    isBubbleRef.current = isBubble;
+  }, [isBubble]);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('overdeskTheme') === 'dark');
   const [use24Hour, setUse24Hour] = useState(true);
@@ -142,7 +148,7 @@ export default function App() {
                               target.closest('.settings-overlay') !== null ||
                               target.closest('#overdesk-activation-gate .card') !== null;
         
-        if (isInteractive) {
+        if (isBubbleRef.current || isInteractive) {
           (window as any).electronAPI.setIgnoreMouseEvents(false);
         } else {
           (window as any).electronAPI.setIgnoreMouseEvents(true, { forward: true });

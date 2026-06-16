@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 /**
  * Clean & bulletproof dragging hook that supports:
- * 1. Native Electron borderless high-fps dragging (via -webkit-app-region)
+ * 1. Native/Programmatic Electron borderless high-fps dragging (respects scale factors / zoom perfectly)
  * 2. High-fidelity Web-safe unconstrained dragging (respects scale factors / zoom perfectly)
  */
 export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?: () => void) {
@@ -10,6 +10,7 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const mouseDownPos = useRef({ x: 0, y: 0 });
+  const lastScreenPos = useRef({ x: 0, y: 0 });
   const hasMovedRef = useRef(false);
   const positionRef = useRef({ x: initialX, y: initialY });
   const elementRef = useRef<HTMLDivElement | null>(null);
@@ -47,12 +48,6 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
   }, [isElectron]);
 
   const onPointerDown = (e: React.PointerEvent) => {
-    // In Electron, we let native OS window dragging handle it.
-    // CSS "-webkit-app-region: drag" does 100% of the drag lifting smoothly.
-    if (isElectron) {
-      return;
-    }
-
     const target = e.target as HTMLElement;
     // Don't drag if clicking buttons, select elements, svg items, input fields, or inside card containers
     if (target.closest('button, select, input, a, [role="button"], svg, path, .card-container, .news-list')) {
@@ -72,20 +67,18 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
     
     // Store starting positions
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    lastScreenPos.current = { x: e.screenX, y: e.screenY };
     dragStart.current = {
       x: positionRef.current.x,
       y: positionRef.current.y
     };
     
-    e.preventDefault();
+    if (!isElectron) {
+      e.preventDefault();
+    }
   };
 
   useEffect(() => {
-    if (isElectron) {
-      // Electron native dragging needs no JS move handlers to compute coordinates.
-      return;
-    }
-
     const onPointerMove = (e: PointerEvent) => {
       if (!isDragging.current) return;
       
@@ -93,20 +86,30 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
       const dy = e.clientY - mouseDownPos.current.y;
       
       // Filter out small accidental clicks
-      if (Math.sqrt(dx * dx + dy * dy) > 3) {
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
         hasMovedRef.current = true;
       }
 
-      // Crucial: divide current mouse offset by widget's scale (zoom factor)
-      // to keep widget bound 100% under the mouse cursor at all scale levels!
-      const currentScale = scale || 1;
-      const newX = dragStart.current.x + dx / currentScale;
-      const newY = dragStart.current.y + dy / currentScale;
-      
-      positionRef.current = { x: newX, y: newY };
-      if (elementRef.current) {
-        elementRef.current.style.left = `${newX}px`;
-        elementRef.current.style.top = `${newY}px`;
+      if (isElectron) {
+        // Programmatic Electron window move based on precise screen cursor delta
+        const dX = e.screenX - lastScreenPos.current.x;
+        const dY = e.screenY - lastScreenPos.current.y;
+        if (dX !== 0 || dY !== 0) {
+          (window as any).electronAPI.dragWindow({ dX, dY });
+        }
+        lastScreenPos.current = { x: e.screenX, y: e.screenY };
+      } else {
+        // Crucial: divide current mouse offset by widget's scale (zoom factor)
+        // to keep widget bound 100% under the mouse cursor at all scale levels!
+        const currentScale = scale || 1;
+        const newX = dragStart.current.x + dx / currentScale;
+        const newY = dragStart.current.y + dy / currentScale;
+        
+        positionRef.current = { x: newX, y: newY };
+        if (elementRef.current) {
+          elementRef.current.style.left = `${newX}px`;
+          elementRef.current.style.top = `${newY}px`;
+        }
       }
     };
 
@@ -118,7 +121,9 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
             elementRef.current.releasePointerCapture(e.pointerId);
           } catch (err) {}
         }
-        setPosition(positionRef.current);
+        if (!isElectron) {
+          setPosition(positionRef.current);
+        }
         if (!hasMovedRef.current && clickCallbackRef.current) {
           clickCallbackRef.current();
         }
