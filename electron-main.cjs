@@ -122,6 +122,7 @@ function createWindow() {
     maximizable: false,
     fullscreenable: false,
     alwaysOnTop: true, // Always on top by default
+    show: false, // ← FIXED: Don't show until fully painted — eliminates crop-on-launch race condition
   });
 
   // Keep window floated at highest z-order level across spaces/fullscreens
@@ -129,6 +130,12 @@ function createWindow() {
 
   // Load the Express server url
   mainWindow.loadURL('http://localhost:3000');
+
+  // FIXED: Only show window once content is fully rendered
+  // This prevents the invisible-border/crop bug that appeared sometimes on launch
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
   // Handle load failure gracefully (retry until server is fully active)
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {

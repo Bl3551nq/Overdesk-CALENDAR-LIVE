@@ -89,6 +89,22 @@ export default function App() {
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
 
+  // Periodically log window size to debug DPI or boundary mismatch
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('[DEBUG Window Size]', {
+        'window.innerWidth': window.innerWidth,
+        'window.innerHeight': window.innerHeight,
+        'window.outerWidth': window.outerWidth,
+        'window.outerHeight': window.outerHeight,
+        'document.body.clientWidth': document.body?.clientWidth,
+        'document.body.clientHeight': document.body?.clientHeight,
+        'devicePixelRatio': window.devicePixelRatio,
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // --- ELECTRON AUTO-RESIZE & HOVER CLICK-THROUGH HANDLERS ---
   useEffect(() => {
     if (isElectron) {

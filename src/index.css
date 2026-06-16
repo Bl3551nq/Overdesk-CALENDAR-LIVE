@@ -11,6 +11,10 @@ html, body, #root {
   pointer-events: none !important;
 }
 
+body {
+  outline: 1px dashed red !important;
+}
+
 /* Enable clicks on actual interactive application zones */
 .widget,
 #overdesk-activation-gate,
@@ -71,6 +75,7 @@ body.dark .blob {
 
 /* Float Widget styling */
 .widget {
+  outline: 1px dashed red !important;
   -webkit-app-region: drag !important;
   min-height: 52px;
   position: absolute;
