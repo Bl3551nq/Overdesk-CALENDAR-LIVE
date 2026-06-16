@@ -70,7 +70,16 @@ export default function App() {
   const [disabledAlarms, setDisabledAlarms] = useState<Set<string>>(new Set());
 
   // Drag controls
-  const { position, elementRef, onPointerDown, hasMovedRef } = useDrag(40, 40, windowScale);
+  const { position, elementRef, onPointerDown, hasMovedRef } = useDrag(
+    40, 
+    40, 
+    windowScale,
+    () => {
+      if (isBubble) {
+        setIsBubble(false);
+      }
+    }
+  );
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
 
@@ -651,7 +660,7 @@ export default function App() {
           position: 'absolute',
           left: isElectron ? '0px' : `${position.x}px`,
           top: isElectron ? '0px' : `${position.y}px`,
-          padding: '32px', // Invisible padding area to fully contain the gorgeous soft drop shadows
+          padding: '20px', // Invisible padding area to fully contain the gorgeous soft drop shadows (reduced to 20px for bounds)
           pointerEvents: 'none', // Lets user click right through the shadow padding
           display: 'inline-block',
           boxSizing: 'border-box',
@@ -671,6 +680,16 @@ export default function App() {
               setIsBubble(false);
             } else {
               setMinimized(prev => !prev);
+            }
+          }}
+          onPointerUp={(e) => {
+            // If dragging occurred, don't execute expand action
+            if (hasMovedRef.current) {
+              return;
+            }
+            if (isBubble) {
+              e.stopPropagation();
+              setIsBubble(false);
             }
           }}
           onClick={(e) => {
@@ -694,7 +713,18 @@ export default function App() {
         >
         {/* Compact Bubble launcher icon (Shown only if bubble=true) */}
         {isBubble && (
-          <div className="bubble-icon select-none cursor-pointer" title="Expand Widget">
+          <div 
+            className="bubble-icon select-none cursor-pointer" 
+            title="Expand Widget"
+            onPointerUp={(e) => {
+              e.stopPropagation();
+              setIsBubble(false);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsBubble(false);
+            }}
+          >
             📅
           </div>
         )}

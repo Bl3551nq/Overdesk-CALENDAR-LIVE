@@ -98,10 +98,10 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 350,
-    height: 520,
-    minHeight: 30,
-    minWidth: 30,
+    width: 350, // Match default widget width exactly, no extra transparent padding buffers
+    height: 520, // Match default widget height exactly
+    minHeight: 30, // Enable perfect scale down for 54px compact bubble launcher
+    minWidth: 30, // Enable perfect scale down for 54px compact bubble launcher
     title: "Overdesk FX Checklist",
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
@@ -110,14 +110,14 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       backgroundThrottling: false,
     },
+    // Frameless and transparent options
     frame: false,
     transparent: true,
     autoHideMenuBar: true,
     hasShadow: false,
     maximizable: false,
     fullscreenable: false,
-    alwaysOnTop: true,
-    show: false, // ← FIXED: Don't show until fully painted — eliminates crop-on-launch race condition
+    alwaysOnTop: true, // Always on top by default
   });
 
   // Keep window floated at highest z-order level across spaces/fullscreens
@@ -125,12 +125,6 @@ function createWindow() {
 
   // Load the Express server url
   mainWindow.loadURL('http://localhost:3000');
-
-  // FIXED: Only show window once content is fully rendered
-  // This prevents the invisible-border/crop bug that appeared sometimes on launch
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
 
   // Handle load failure gracefully (retry until server is fully active)
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
@@ -152,6 +146,7 @@ function createWindow() {
     }
   });
 
+  // On window focus, check state
   mainWindow.on('closed', () => {
     mainWindow = null;
   });

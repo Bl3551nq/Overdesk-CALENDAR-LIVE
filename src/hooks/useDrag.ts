@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
  * 1. Native Electron borderless high-fps dragging (via -webkit-app-region)
  * 2. High-fidelity Web-safe unconstrained dragging (respects scale factors / zoom perfectly)
  */
-export function useDrag(initialX = 40, initialY = 40, scale = 1) {
+export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?: () => void) {
   const [position, setPosition] = useState({ x: initialX, y: initialY });
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -15,6 +15,11 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1) {
   const elementRef = useRef<HTMLDivElement | null>(null);
   
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI !== undefined;
+
+  const clickCallbackRef = useRef(onWidgetClick);
+  useEffect(() => {
+    clickCallbackRef.current = onWidgetClick;
+  }, [onWidgetClick]);
 
   // Sync internal position reference
   useEffect(() => {
@@ -114,6 +119,9 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1) {
           } catch (err) {}
         }
         setPosition(positionRef.current);
+        if (!hasMovedRef.current && clickCallbackRef.current) {
+          clickCallbackRef.current();
+        }
       }
     };
 

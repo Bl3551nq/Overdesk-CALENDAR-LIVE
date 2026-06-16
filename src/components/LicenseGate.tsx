@@ -142,7 +142,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         }
 
         #overdesk-activation-gate .gate-card-wrapper {
-          padding: 32px;
+          padding: 20px;
           display: inline-block;
           pointer-events: none;
           background: transparent;
