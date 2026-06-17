@@ -54,6 +54,15 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
       return;
     }
     
+    if (isElectron) {
+      // In Electron, if we are in full widget/unminimized mode, we let native OS window dragging handle it via CSS "-webkit-app-region: drag".
+      // We only run programmatic dragging in compact circular bubble mode so clicks/pointer-up trigger properly.
+      const isBubbleCompact = elementRef.current?.querySelector('.widget.bubble') !== null;
+      if (!isBubbleCompact) {
+        return;
+      }
+    }
+    
     if (elementRef.current) {
       try {
         elementRef.current.setPointerCapture(e.pointerId);
@@ -91,6 +100,11 @@ export function useDrag(initialX = 40, initialY = 40, scale = 1, onWidgetClick?:
       }
 
       if (isElectron) {
+        const isBubbleCompact = elementRef.current?.querySelector('.widget.bubble') !== null;
+        if (!isBubbleCompact) {
+          isDragging.current = false;
+          return;
+        }
         // Programmatic Electron window move based on precise screen cursor delta
         const dX = e.screenX - lastScreenPos.current.x;
         const dY = e.screenY - lastScreenPos.current.y;

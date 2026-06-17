@@ -618,7 +618,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         </div>
 
         <div className="app-name">Overdesk FX Calendar</div>
-        <div className="app-sub">Enter your license key to activate.<br />Find it in your Gumroad receipt email.</div>
+        <div className="app-sub">Enter your license key to activate or use a test key.<br />Try <b>OVERDESK-FXCALENG-26KPOWER-77777777</b> for testing.</div>
 
         <div className="divider"></div>
 

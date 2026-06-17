@@ -102,8 +102,8 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 350, // Match default widget width exactly, no extra transparent padding buffers
-    height: 520, // Match default widget height exactly
+    width: 350,
+    height: 520,
     minHeight: 30, // Enable perfect scale down for 54px compact bubble launcher
     minWidth: 30, // Enable perfect scale down for 54px compact bubble launcher
     title: "Overdesk FX Calendar",

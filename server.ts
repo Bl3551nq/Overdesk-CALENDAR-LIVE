@@ -73,11 +73,10 @@ async function startServer() {
     const sanitizedKey = key.trim();
     const cleanKey = sanitizedKey.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 
-    // 32-character test keys (clean alphanumeric)
-    const testCleanKey1 = 'TESTOVERDESKACTIVELICENSEKEY32CH'; // TESTOVER-DESKACTI-VELICENS-EKEY32CH
-    const testCleanKey2 = 'GUMROADTESTACTIVELICENSE32CH';
+    // Unique 32-character test key (clean alphanumeric)
+    const uniqueTestKey = 'OVERDESKFXCALENG26KPOWER77777777'; // OVERDESK-FXCALENG-26KPOWER-77777777
 
-    if (cleanKey === testCleanKey1 || cleanKey === testCleanKey2) {
+    if (cleanKey === uniqueTestKey) {
       saveLicenseLocally(sanitizedKey);
       return res.json({
         success: true,
