@@ -16,7 +16,7 @@ let isQuitting = false;
 // Register IPC handlers for window control from renderer process
 ipcMain.on('resize-window', (event, width, height) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setSize(width, height);
+    mainWindow.setContentSize(width, height);
   }
 });
 
@@ -44,6 +44,19 @@ ipcMain.on('close-window', () => {
 ipcMain.on('minimize-window', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.minimize();
+  }
+});
+
+ipcMain.on('clear-app-data', (event) => {
+  const { session } = require('electron');
+  if (session && session.defaultSession) {
+    session.defaultSession.clearStorageData().then(() => {
+      console.log('[CLEAR DATA] Cleared all storages successfully.');
+      app.relaunch();
+      app.exit(0);
+    }).catch(err => {
+      console.error('[CLEAR DATA] Error clearing storage data:', err);
+    });
   }
 });
 
@@ -84,6 +97,16 @@ if (!gotTheLock) {
     // Standardize paths and app root
     process.env.ELECTRON_APP_PATH = app.getAppPath();
 
+    // Automatically clear network and HTTP caches on startup to clean up any obsolete web assets in the background
+    const { session } = require('electron');
+    if (session && session.defaultSession) {
+      session.defaultSession.clearCache().then(() => {
+        console.log('[CACHE] HTTP and network asset cache cleared successfully on startup.');
+      }).catch(err => {
+        console.warn('[CACHE] Failed to clear browser caches:', err);
+      });
+    }
+
     // Start Express Backend Server inside ready event
     try {
       console.log("Starting backend Express server within Electron...");
@@ -102,8 +125,9 @@ if (!gotTheLock) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 350,
-    height: 520,
+    width: 390,
+    height: 560,
+    useContentSize: true, // Treat dimensions as exact web page viewport sizes
     minHeight: 30, // Enable perfect scale down for 54px compact bubble launcher
     minWidth: 30, // Enable perfect scale down for 54px compact bubble launcher
     title: "Overdesk FX Calendar",

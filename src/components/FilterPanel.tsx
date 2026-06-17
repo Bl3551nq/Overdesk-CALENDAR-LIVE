@@ -381,6 +381,30 @@ export function FilterPanel({
                 </div>
               </button>
             </div>
+
+            {/* Added: Cache Resolution System to resolve user storage conflicts directly */}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-300 font-sans">
+                App Data & Cache
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you sure you want to completely clear all saved app preferences, license activations, and system cache? This will restart the application in a pristine, clean state.")) {
+                    if ((window as any).electronAPI && (window as any).electronAPI.clearAppData) {
+                      (window as any).electronAPI.clearAppData();
+                    } else {
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      window.location.reload();
+                    }
+                  }
+                }}
+                className="text-[10px] font-extrabold py-1.5 px-3 rounded-xl border border-amber-500/35 bg-amber-500/10 hover:bg-amber-600 hover:text-white text-amber-600 dark:border-amber-500/25 dark:text-amber-400 dark:hover:bg-amber-500 dark:hover:text-white active:scale-95 transition-all select-none font-sans shrink-0 cursor-pointer"
+              >
+                Wipe & Restart
+              </button>
+            </div>
           </div>
         )}
 

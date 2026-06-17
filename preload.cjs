@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setIgnoreMouseEvents: (ignore, options) => ipcRenderer.send('set-ignore-mouse-events', ignore, options),
   setLaunchOnStart: (enable) => ipcRenderer.send('set-launch-on-start', enable),
   dragWindow: (delta) => ipcRenderer.send('drag-window', delta),
+  clearAppData: () => ipcRenderer.send('clear-app-data'),
 });
