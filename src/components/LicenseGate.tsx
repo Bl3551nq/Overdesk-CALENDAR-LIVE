@@ -142,7 +142,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         }
 
         #overdesk-activation-gate .gate-card-wrapper {
-          padding: 20px;
+          padding: 0px;
           display: inline-block;
           pointer-events: none;
           background: transparent;
@@ -154,7 +154,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           border-radius: 32px;
           background: linear-gradient(150deg, #ffffff 0%, #f0f0ff 25%, #e4eaff 55%, #ede8ff 100%);
           border: 1px solid rgba(255, 255, 255, 0.95);
-          box-shadow: 0 8px 40px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+          box-shadow: none !important;
           padding: 16px 22px;
           display: flex;
           flex-direction: column;
@@ -168,7 +168,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         #overdesk-activation-gate.dark .card {
           background: linear-gradient(150deg, #13131c 0%, #111118 25%, #0d0f19 55%, #121021 100%);
           border: 1px solid rgba(255, 255, 255, 0.06);
-          box-shadow: 0 12px 50px rgba(0, 0, 0, 0.61);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .top-bar {

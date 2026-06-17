@@ -193,29 +193,41 @@ export default function App() {
 
   useEffect(() => {
     const initializeApp = async () => {
+      // Check if this is the first execution/launch on this client origin
+      const firstTimeLaunch = !localStorage.getItem('overdesk_first_time_launch_seen');
+
       // Restore license activation status
+      let currentlyVerified = false;
       try {
         const verified = localStorage.getItem('overdesk_license_verified');
         if (verified === 'true') {
+          currentlyVerified = true;
           setIsVerified(true);
         }
       } catch (e) {
         console.warn('License status read error', e);
       }
 
-      // Query server for license file backup/persistence
-      try {
-        const checkRes = await fetch('/api/license/status');
-        if (checkRes.ok) {
-          const checkData = await checkRes.json();
-          if (checkData.success && checkData.key) {
-            localStorage.setItem('overdesk_license_verified', 'true');
-            localStorage.setItem('overdesk_verified_key', checkData.key);
-            setIsVerified(true);
+      // Only query server for license backup if it is NOT the absolute first launch of the app.
+      // This prevents old ~/.overdesk_license.json from previous app versions/installations/cached states
+      // from bypassing the license key screen on a brand-new pristine app launch.
+      if (!currentlyVerified && !firstTimeLaunch) {
+        try {
+          const checkRes = await fetch('/api/license/status');
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            if (checkData.success && checkData.key) {
+              localStorage.setItem('overdesk_license_verified', 'true');
+              localStorage.setItem('overdesk_verified_key', checkData.key);
+              setIsVerified(true);
+            }
           }
+        } catch (err) {
+          console.warn('Failed to fetch backup license status from server:', err);
         }
-      } catch (err) {
-        console.warn('Failed to fetch backup license status from server:', err);
+      } else if (firstTimeLaunch) {
+        console.log('[FX LICENSE] Brand new launch detected on pristine state. Forcing LicenseGate first.');
+        setIsVerified(false);
       }
       setIsLicenseLoading(false);
 
@@ -535,30 +547,55 @@ export default function App() {
       const alarmWindow = 5 * 60 * 1000; // exact 5 mins in ms
       const buffer = 45 * 1000; // tolerance window (45 seconds)
 
-      mergedEvents.forEach(ev => {
+      // 1. Gather all incoming events that are in the 5-minute pre-alert zone and not yet alerted
+      const upcomingUnalerted = mergedEvents.filter(ev => {
         const evTime = new Date(ev.date).getTime();
         const diff = evTime - now;
+        const isWithinWindow = diff > 0 && Math.abs(diff - alarmWindow) <= buffer;
+        const key = `${ev.title}|${ev.date}`;
+        return isWithinWindow && !alertedEvents.has(key);
+      });
 
-        // If the news announcement is coming up in approx 5 minutes, ring!
-        if (diff > 0 && Math.abs(diff - alarmWindow) <= buffer) {
+      if (upcomingUnalerted.length === 0) return;
+
+      // 2. Group these events by their exact scheduled time (ISO date string)
+      const groupsByTime: { [dateStr: string]: typeof mergedEvents } = {};
+      upcomingUnalerted.forEach(ev => {
+        if (!groupsByTime[ev.date]) {
+          groupsByTime[ev.date] = [];
+        }
+        groupsByTime[ev.date].push(ev);
+      });
+
+      // 3. Process each group: mark as alerted, and play EXACTLY ONE alarm (5 rings) if at least one in the group is unmuted
+      const nextAlerted = new Set<string>(alertedEvents);
+      let didTriggerAlarmThisTick = false;
+
+      Object.entries(groupsByTime).forEach(([dateStr, evList]) => {
+        let hasActiveAlarmInGroup = false;
+
+        evList.forEach(ev => {
           const key = `${ev.title}|${ev.date}`;
-          if (!alertedEvents.has(key)) {
-            const nextAlerted = new Set<string>(alertedEvents);
-            nextAlerted.add(key);
-            saveAlertState(nextAlerted);
+          nextAlerted.add(key);
 
-            // Turn off alarm if the bell is muted for this specific event
-            if (!disabledAlarms.has(key)) {
-              // Ring matching audio chime 5 times
-              const curSoundKey = SOUND_LIST[soundIndex].key;
-              triggerRings(curSoundKey, 5);
-              console.log(`[FX SYSTEM ALERT] 5-minute incoming news: ${ev.title}`);
-            } else {
-              console.log(`[FX SYSTEM ALERT] 5-minute incoming news muted (bell off): ${ev.title}`);
-            }
+          if (!disabledAlarms.has(key)) {
+            hasActiveAlarmInGroup = true;
           }
+        });
+
+        // Trigger the beautiful bell chime pattern exactly once for the entire slot
+        if (hasActiveAlarmInGroup && !didTriggerAlarmThisTick) {
+          const curSoundKey = SOUND_LIST[soundIndex].key;
+          triggerRings(curSoundKey, 5);
+          didTriggerAlarmThisTick = true;
+          console.log(`[FX SYSTEM ALERT] 5-minute pre-alert slot trigger for ${dateStr} - playing chime for active events:`, evList.map(e => e.title));
+        } else if (!hasActiveAlarmInGroup) {
+          console.log(`[FX SYSTEM ALERT] 5-minute pre-alert slot ${dateStr} muted (all concurrent titles disabled in settings)`);
         }
       });
+
+      // Persist the newly alerted events to state and local storage
+      saveAlertState(nextAlerted);
     }, 5000); // Poll every 5 seconds for high precision live alarms
 
     return () => clearInterval(alertTimer);
@@ -665,7 +702,10 @@ export default function App() {
     return (
       <LicenseGate 
         isDarkMode={isDarkMode} 
-        onVerifySuccess={() => setIsVerified(true)} 
+        onVerifySuccess={() => {
+          localStorage.setItem('overdesk_first_time_launch_seen', 'true');
+          setIsVerified(true);
+        }} 
         onCloseApp={() => setIsClosed(true)}
       />
     );
@@ -682,8 +722,8 @@ export default function App() {
           position: 'absolute',
           left: isElectron ? '0px' : `${position.x}px`,
           top: isElectron ? '0px' : `${position.y}px`,
-          padding: '20px', // Invisible padding area to fully contain the gorgeous soft drop shadows (reduced to 20px for bounds)
-          pointerEvents: 'none', // Lets user click right through the shadow padding
+          padding: '0px', // No padding outside the widget to ensure exact bounds & border-free rendering
+          pointerEvents: 'none', // Lets user click right through any outer regions
           display: 'inline-block',
           boxSizing: 'border-box',
           zoom: windowScale,

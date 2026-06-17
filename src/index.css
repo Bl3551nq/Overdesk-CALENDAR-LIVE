@@ -12,7 +12,8 @@ html, body, #root {
 }
 
 body {
-  outline: 1px dashed red !important;
+  margin: 0;
+  padding: 0;
 }
 
 /* Enable clicks on actual interactive application zones */
