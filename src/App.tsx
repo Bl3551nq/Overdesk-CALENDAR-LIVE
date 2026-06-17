@@ -73,6 +73,7 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [soundIndex, setSoundIndex] = useState(0); // Default Pokémon Heal
   const [alertedEvents, setAlertedEvents] = useState<Set<string>>(new Set());
+  const [alertedTimes, setAlertedTimes] = useState<Set<string>>(new Set());
   const [disabledAlarms, setDisabledAlarms] = useState<Set<string>>(new Set());
 
   // Drag controls
@@ -247,8 +248,18 @@ export default function App() {
         const storedAlerts = localStorage.getItem('overdeskAlerted');
         if (storedAlerts) {
           const parsed = JSON.parse(storedAlerts);
-          if (parsed[todayStr]) {
-            setAlertedEvents(new Set(parsed[todayStr]));
+          const dayData = parsed[todayStr];
+          if (dayData) {
+            if (dayData && typeof dayData === 'object' && !Array.isArray(dayData)) {
+              if (Array.isArray(dayData.events)) {
+                setAlertedEvents(new Set(dayData.events));
+              }
+              if (Array.isArray(dayData.times)) {
+                setAlertedTimes(new Set(dayData.times));
+              }
+            } else if (Array.isArray(dayData)) {
+              setAlertedEvents(new Set(dayData));
+            }
           }
         }
       } catch (e) {
@@ -403,11 +414,17 @@ export default function App() {
     }
   };
 
-  const saveAlertState = (updated: Set<string>) => {
-    setAlertedEvents(updated);
+  const saveAlertState = (updatedEvents: Set<string>, updatedTimes: Set<string>) => {
+    setAlertedEvents(updatedEvents);
+    setAlertedTimes(updatedTimes);
     try {
       const todayStr = new Date().toLocaleDateString('en-CA');
-      const fresh = { [todayStr]: [...updated] };
+      const fresh = {
+        [todayStr]: {
+          events: [...updatedEvents],
+          times: [...updatedTimes]
+        }
+      };
       localStorage.setItem('overdeskAlerted', JSON.stringify(fresh));
     } catch (e) {
       console.warn('Alert storage error', e);
@@ -567,8 +584,9 @@ export default function App() {
         groupsByTime[ev.date].push(ev);
       });
 
-      // 3. Process each group: mark as alerted, and play EXACTLY ONE alarm (5 rings) if at least one in the group is unmuted
+      // 3. Process each group: mark as alerted, and play EXACTLY ONE alarm (5 rings) if at least one in the group is unmuted and the time slot was never alerted before
       const nextAlerted = new Set<string>(alertedEvents);
+      const nextAlertedTimes = new Set<string>(alertedTimes);
       let didTriggerAlarmThisTick = false;
 
       Object.entries(groupsByTime).forEach(([dateStr, evList]) => {
@@ -584,22 +602,25 @@ export default function App() {
         });
 
         // Trigger the beautiful bell chime pattern exactly once for the entire slot
-        if (hasActiveAlarmInGroup && !didTriggerAlarmThisTick) {
+        if (hasActiveAlarmInGroup && !alertedTimes.has(dateStr) && !didTriggerAlarmThisTick) {
           const curSoundKey = SOUND_LIST[soundIndex].key;
           triggerRings(curSoundKey, 5);
           didTriggerAlarmThisTick = true;
+          nextAlertedTimes.add(dateStr);
           console.log(`[FX SYSTEM ALERT] 5-minute pre-alert slot trigger for ${dateStr} - playing chime for active events:`, evList.map(e => e.title));
         } else if (!hasActiveAlarmInGroup) {
           console.log(`[FX SYSTEM ALERT] 5-minute pre-alert slot ${dateStr} muted (all concurrent titles disabled in settings)`);
+        } else {
+          console.log(`[FX SYSTEM ALERT] 5-minute pre-alert slot ${dateStr} already alarmed previously - omitting secondary chimes to prevent noise`);
         }
       });
 
-      // Persist the newly alerted events to state and local storage
-      saveAlertState(nextAlerted);
+      // Persist the newly alerted events and times to state and local storage
+      saveAlertState(nextAlerted, nextAlertedTimes);
     }, 5000); // Poll every 5 seconds for high precision live alarms
 
     return () => clearInterval(alertTimer);
-  }, [soundEnabled, soundIndex, alertedEvents, disabledAlarms]);
+  }, [soundEnabled, soundIndex, alertedEvents, alertedTimes, disabledAlarms, mergedEvents]);
 
   // --- DAY CALCULATOR & HEADINGS ---
   const dayStr = viewDate.toLocaleDateString('en-CA');

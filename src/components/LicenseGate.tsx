@@ -277,7 +277,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           height: 3px;
           border-radius: 99px;
           background: rgba(0,0,0,0.06);
-          transition: background 0.3s, box-shadow 0.3s;
+          transition: background 0.3s;
         }
 
         #overdesk-activation-gate.dark .seg {
@@ -286,12 +286,12 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
 
         #overdesk-activation-gate .seg.filled {
           background: #6e00d2;
-          box-shadow: 0 0 6px 1px rgba(110,0,210,0.3);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate.dark .seg.filled {
           background: #818cf8;
-          box-shadow: 0 0 8px 1px rgba(129,140,248,0.4);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .inp-label {
@@ -322,7 +322,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           letter-spacing: 0.06em;
           text-align: center;
           outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, color 0.5s, border-color 0.5s;
+          transition: border-color 0.2s, background 0.2s, color 0.5s, border-color 0.5s;
           margin-bottom: 6px;
           caret-color: #6e00d2;
         }
@@ -345,24 +345,24 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         #overdesk-activation-gate .key-input:focus {
           border-color: rgba(110,0,210,0.45);
           background: rgba(110,0,210,0.01);
-          box-shadow: 0 0 0 3px rgba(110,0,210,0.06);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate.dark .key-input:focus {
           border-color: rgba(129, 140, 248, 0.45);
           background: rgba(129, 140, 248, 0.01);
-          box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.08);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .key-input.shake-err {
           border-color: rgba(220,38,38,0.5);
-          box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+          box-shadow: none !important;
           animation: shake 0.35s ease;
         }
 
         #overdesk-activation-gate .key-input.ok {
           border-color: rgba(16,185,129,0.5);
-          box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+          box-shadow: none !important;
         }
 
         @keyframes shake {
@@ -402,11 +402,11 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           border: none;
           cursor: pointer;
           letter-spacing: 0.01em;
-          transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+          transition: opacity 0.15s, transform 0.12s;
           position: relative;
           overflow: hidden;
           margin-bottom: 10px;
-          box-shadow: 0 4px 16px rgba(110,0,210,0.18);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .act-btn::after {
@@ -420,7 +420,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
         #overdesk-activation-gate .act-btn:hover {
           opacity: 0.92;
           transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(110,0,210,0.25);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .act-btn:active {
@@ -576,7 +576,7 @@ export default function LicenseGate({ isDarkMode, onVerifySuccess, onCloseApp }:
           cursor: pointer;
           transition: opacity 0.15s, transform 0.12s;
           animation: fadeUp 0.4s 0.3s ease both;
-          box-shadow: 0 4px 12px rgba(110,0,210,0.2);
+          box-shadow: none !important;
         }
 
         #overdesk-activation-gate .launch-btn:hover {
